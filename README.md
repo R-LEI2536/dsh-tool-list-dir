@@ -21,7 +21,7 @@ A lightweight, read-only directory listing tool for [dsh-user-approval](https://
 ### From GitHub
 
 ```bash
-dsh plugin --profile web add github:your-org/dsh-tool-list-dir
+dsh plugin --profile web add github:R-LEI2536/dsh-tool-list-dir
 ```
 
 

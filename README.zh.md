@@ -19,14 +19,14 @@
 ### 从 GitHub 安装
 
 ```bash
-dsh plugin --profile web add github:your-org/dsh-tool-list-dir#main
+dsh plugin --profile web add github:R-LEI2536/dsh-tool-list-dir
 ```
 
 或添加到 `cordis.patch.yml`：
 
 ```yaml
 - id: tool-list-dir
-  name: github:your-org/dsh-tool-list-dir#main
+  name: github:R-LEI2536/dsh-tool-list-dir
 ```
 
 ## 配置说明
