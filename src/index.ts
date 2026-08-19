@@ -6,15 +6,49 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type {} from '@deepseek-ai/dsh-fs'
+import type {} from '@deepseek-ai/dsh-system-prompt'
+import z from '@deepseek-ai/schemastery'
 
 export const name = 'tool-list-dir'
-export const inject = ['tools', 'fs']
+export const inject = ['tools', 'fs', 'systemPrompt']
 
 // Constants
 const MAX_ENTRIES = 100
 const TYPE_ORDER: Record<string, number> = { directory: 0, file: 1, other: 2 }
 
-export function apply(ctx: Context): void {
+// Default guidance text
+const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands like ls — to browse directory structures. Results are sorted (directories first, then files), include type and size information, and show statistics. Use this for understanding project layouts.'
+
+/** Plugin configuration schema. */
+export interface Config {
+  /** Order of the system prompt guidance section (default: 100). */
+  order?: number
+  /** Custom guidance text for the system prompt (default: standard guidance). */
+  guidance?: string
+  /** Maximum number of entries to return before truncation (default: 100). */
+  maxEntries?: number
+}
+
+export const Config: z<Config> = z.object({
+  order: z.number().default(100),
+  guidance: z.string().default(DEFAULT_GUIDANCE),
+  maxEntries: z.number().min(1).max(1000).default(MAX_ENTRIES),
+})
+
+/** Resolved configuration with all defaults applied. */
+type ResolvedConfig = Required<Config>
+
+export function apply(ctx: Context, config: Config): void {
+  // Apply defaults
+  const resolved = config as ResolvedConfig
+  
+  // Register system prompt guidance
+  ctx.systemPrompt.section({
+    name: 'tool:list_directory',
+    order: resolved.order,
+    text: resolved.guidance,
+  })
+  
   ctx.tools.register(defineTool({
     name: 'list_directory',
     description: 'List a directory: every entry with type and byte size. Read-only — use this instead of `ls` in the shell when browsing.',
@@ -127,8 +161,8 @@ export function apply(ctx: Context): void {
       }
       
       // Truncate if needed
-      if (entries.length > MAX_ENTRIES) {
-        const shown = entries.slice(0, MAX_ENTRIES)
+      if (entries.length > resolved.maxEntries) {
+        const shown = entries.slice(0, resolved.maxEntries)
         return {
           path: target.displayPath,
           entries: shown.map(entry => ({
@@ -138,9 +172,9 @@ export function apply(ctx: Context): void {
           })),
           stats,
           truncated: {
-            shown: MAX_ENTRIES,
+            shown: resolved.maxEntries,
             total: entries.length,
-            remaining: entries.length - MAX_ENTRIES,
+            remaining: entries.length - resolved.maxEntries,
           },
         }
       }
