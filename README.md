@@ -2,7 +2,11 @@
 
 **Version 0.2.0**
 
-A lightweight, read-only directory listing tool for DeepSeek Harness.
+[中文](./README.zh.md)
+
+A lightweight, read-only directory listing tool for [dsh-user-approval](https://github.com/R-LEI2536/dsh-user-approval).
+
+一个轻量级、只读的目录列表工具，专为 [dsh-user-approval](https://github.com/R-LEI2536/dsh-user-approval) 设计。
 
 ## Features
 
@@ -17,15 +21,9 @@ A lightweight, read-only directory listing tool for DeepSeek Harness.
 ### From GitHub
 
 ```bash
-dsh plugin --profile web add github:your-org/dsh-tool-list-dir#main
+dsh plugin --profile web add github:your-org/dsh-tool-list-dir
 ```
 
-Or add to your `cordis.patch.yml`:
-
-```yaml
-- id: tool-list-dir
-  name: github:your-org/dsh-tool-list-dir#main
-```
 
 ## Configuration
 

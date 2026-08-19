@@ -2,7 +2,9 @@
 
 **版本 0.2.0**
 
-一个轻量级、只读的目录列表工具，专为 DeepSeek Harness 设计。
+[English](./README.md)
+
+一个轻量级、只读的目录列表工具，专为 [dsh-user-approval](https://github.com/R-LEI2536/dsh-user-approval) 设计。
 
 ## 功能特性
 
