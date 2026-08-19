@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-list-dir",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "List directory tool for DeepSeek Harness",
   "type": "module",
   "main": "lib/index.js",
