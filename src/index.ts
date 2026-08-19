@@ -17,7 +17,7 @@ const MAX_ENTRIES = 100
 const TYPE_ORDER: Record<string, number> = { directory: 0, file: 1, other: 2 }
 
 // Default guidance text
-const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands like ls — to browse directory structures. Results are sorted (directories first, then files), include type and size information, and show statistics. Use this for understanding project layouts.'
+const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.'
 
 /** Plugin configuration schema. */
 export interface Config {

@@ -1,5 +1,7 @@
 # dsh-tool-list-dir
 
+**版本 0.2.0**
+
 一个轻量级、只读的目录列表工具，专为 DeepSeek Harness 设计。
 
 ## 功能特性
@@ -12,41 +14,52 @@
 
 ## 安装方式
 
-### 方式 1：从 npm 安装（发布后）
-```bash
-dsh plugin --profile web add dsh-tool-list-dir
-```
+### 从 GitHub 安装
 
-### 方式 2：从本地目录安装
-```bash
-dsh plugin --profile web add link:/path/to/dsh-tool-list-dir
-```
-
-### 方式 3：从 GitHub 安装
 ```bash
 dsh plugin --profile web add github:your-org/dsh-tool-list-dir#main
 ```
 
+或添加到 `cordis.patch.yml`：
+
+```yaml
+- id: tool-list-dir
+  name: github:your-org/dsh-tool-list-dir#main
+```
+
 ## 配置说明
 
-在 `cordis.patch.yml` 中添加：
-
-### 基础用法（使用默认配置）
+### 基础用法（使用所有默认值）
 
 ```yaml
 - id: tool-list-dir
   name: dsh-tool-list-dir
 ```
 
+这将使用默认配置：
+- `order`: 100
+- `guidance`: 标准指导文本（见下文）
+- `maxEntries`: 100
+
 ### 自定义配置
+
+你可以在 agent preset 中自定义工具行为：
 
 ```yaml
 - id: tool-list-dir
   name: dsh-tool-list-dir
   config:
-    order: 150                    # 系统提示指导的顺序（默认：100）
-    guidance: '自定义指导文本'     # 自定义指导文本
-    maxEntries: 200               # 截断前的最大条目数（1-1000，默认：100）
+    # 自定义系统提示指导顺序（默认：100）
+    order: 150
+    
+    # 自定义指导文本
+    guidance: |
+      使用 list_directory 浏览项目结构。
+      结果显示文件大小和类型。
+      按类型和名称排序。
+    
+    # 截断前的最大条目数（1-1000，默认：100）
+    maxEntries: 200
 ```
 
 ### 禁用工具
@@ -60,41 +73,39 @@ dsh plugin --profile web add github:your-org/dsh-tool-list-dir#main
 
 | 选项 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `order` | number | `100` | 系统提示指导部分的顺序 |
-| `guidance` | string | *(见下方默认值)* | 自定义指导文本 |
-| `maxEntries` | number | `100` | 返回的最大条目数（1-1000） |
+| `order` | number | `100` | 系统提示指导部分的顺序。数值越大，在提示词中出现得越靠后。 |
+| `guidance` | string | *(见默认值)* | 显示给模型的自定义指导文本。可用于提供特定上下文的指令。 |
+| `maxEntries` | number | `100` | 返回的最大条目数。范围：1-1000。更大的目录会被截断。 |
 
 ### 默认指导文本
 
 ```
-Use the list_directory tool — not shell commands like ls — to browse directory structures. 
-Results are sorted (directories first, then files), include type and size information, 
-and show statistics. Use this for understanding project layouts.
+Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.
 ```
 
 ## 工具输出
 
-### JSON 结构
-
-工具向模型返回结构化的 JSON 对象：
+### JSON 结构（给模型的）
 
 ```json
 {
   "path": "/home/user/project",
   "entries": [
     { "name": "src", "type": "directory" },
-    { "name": "package.json", "type": "file", "size": 1234 }
+    { "name": "package.json", "type": "file", "size": 1234 },
+    { "name": "README.md", "type": "file", "size": 5678 }
   ],
   "stats": {
-    "total": 2,
-    "files": 1,
+    "total": 3,
+    "files": 2,
     "directories": 1,
     "others": 0
   }
 }
 ```
 
-**当条目过多被截断时**：
+**当条目过多被截断时**（超过 `maxEntries`）：
+
 ```json
 {
   "path": "/home/user/large-project",
@@ -116,6 +127,7 @@ and show statistics. Use this for understanding project layouts.
 ### 渲染输出（用户可见）
 
 **小型目录**：
+
 ```
 Listed 3 items in /home/user/project:
 ──────────────────────────────────────────────────
@@ -127,6 +139,7 @@ Total: 3 entries (2 directories, 1 file)
 ```
 
 **大型目录（截断）**：
+
 ```
 Listed 150 items in /home/user/large-project:
 ──────────────────────────────────────────────────
@@ -139,35 +152,6 @@ DIR            -  tests/
 Total: 150 entries (30 directories, 120 files)
 ```
 
-## 开发指南
-
-### 构建
-
-```bash
-npm run build
-```
-
-### 测试
-
-安装后，在 DSH 会话中测试：
-
-```
-# 模型可以调用：
-list_directory(path: "/home/user")
-```
-
-## 与 Qwen Code 的对比
-
-此工具受 Qwen Code 的 `list_directory` 工具启发，具有相似的功能：
-
-- ✅ 在 100 条时截断
-- ✅ 排序输出（目录优先）
-- ✅ 类型和大小信息
-- ✅ 统计信息显示
-- ✅ 系统提示指导
-
-**主要区别**：DSH 将 JSON 输出（给模型）与渲染文本（给用户）分离，遵循 DSH 最佳实践。
-
 ## 依赖
 
 - `@deepseek-ai/cordis`: 插件框架
@@ -179,7 +163,3 @@ list_directory(path: "/home/user")
 ## 许可证
 
 MIT
-
-## 作者
-
-DeepSeek Harness Community

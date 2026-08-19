@@ -1,5 +1,7 @@
 # dsh-tool-list-dir
 
+**Version 0.2.0**
+
 A lightweight, read-only directory listing tool for DeepSeek Harness.
 
 ## Features
@@ -12,41 +14,52 @@ A lightweight, read-only directory listing tool for DeepSeek Harness.
 
 ## Installation
 
-### Option 1: From npm (when published)
-```bash
-dsh plugin --profile web add dsh-tool-list-dir
-```
+### From GitHub
 
-### Option 2: From local directory
-```bash
-dsh plugin --profile web add link:/path/to/dsh-tool-list-dir
-```
-
-### Option 3: From GitHub
 ```bash
 dsh plugin --profile web add github:your-org/dsh-tool-list-dir#main
 ```
 
+Or add to your `cordis.patch.yml`:
+
+```yaml
+- id: tool-list-dir
+  name: github:your-org/dsh-tool-list-dir#main
+```
+
 ## Configuration
 
-Add to your `cordis.patch.yml`:
-
-### Basic Usage (with defaults)
+### Basic Usage (with all defaults)
 
 ```yaml
 - id: tool-list-dir
   name: dsh-tool-list-dir
 ```
 
-### With Custom Configuration
+This uses default values:
+- `order`: 100
+- `guidance`: Standard guidance text (see below)
+- `maxEntries`: 100
+
+### Custom Configuration
+
+You can customize the tool behavior in your agent preset:
 
 ```yaml
 - id: tool-list-dir
   name: dsh-tool-list-dir
   config:
-    order: 150                    # System prompt guidance order (default: 100)
-    guidance: 'Custom guidance'   # Custom guidance text for the model
-    maxEntries: 200               # Max entries before truncation (1-1000, default: 100)
+    # Custom system prompt guidance order (default: 100)
+    order: 150
+    
+    # Custom guidance text for the model
+    guidance: |
+      Use list_directory to browse project structures.
+      Results show file sizes and types.
+      Sorted by type and name.
+    
+    # Maximum entries before truncation (1-1000, default: 100)
+    maxEntries: 200
 ```
 
 ### Disable the Tool
@@ -60,41 +73,39 @@ Add to your `cordis.patch.yml`:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `order` | number | `100` | Order of the system prompt guidance section |
-| `guidance` | string | *(see default below)* | Custom guidance text for the model |
-| `maxEntries` | number | `100` | Maximum number of entries to return (1-1000) |
+| `order` | number | `100` | Order of the system prompt guidance section. Higher values appear later in the prompt. |
+| `guidance` | string | *(see default)* | Custom guidance text shown to the model. Use this to provide context-specific instructions. |
+| `maxEntries` | number | `100` | Maximum number of entries to return. Range: 1-1000. Larger directories are truncated. |
 
 ### Default Guidance Text
 
 ```
-Use the list_directory tool — not shell commands like ls — to browse directory structures. 
-Results are sorted (directories first, then files), include type and size information, 
-and show statistics. Use this for understanding project layouts.
+Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.
 ```
 
 ## Tool Output
 
-### JSON Structure
-
-The tool returns a structured JSON object to the model:
+### JSON Structure (for the model)
 
 ```json
 {
   "path": "/home/user/project",
   "entries": [
     { "name": "src", "type": "directory" },
-    { "name": "package.json", "type": "file", "size": 1234 }
+    { "name": "package.json", "type": "file", "size": 1234 },
+    { "name": "README.md", "type": "file", "size": 5678 }
   ],
   "stats": {
-    "total": 2,
-    "files": 1,
+    "total": 3,
+    "files": 2,
     "directories": 1,
     "others": 0
   }
 }
 ```
 
-**When truncated (more than maxEntries)**:
+**When truncated** (more than `maxEntries`):
+
 ```json
 {
   "path": "/home/user/large-project",
@@ -113,9 +124,10 @@ The tool returns a structured JSON object to the model:
 }
 ```
 
-### Rendered Output (User-Visible)
+### Rendered Output (user-visible)
 
 **Small directory**:
+
 ```
 Listed 3 items in /home/user/project:
 ──────────────────────────────────────────────────
@@ -127,6 +139,7 @@ Total: 3 entries (2 directories, 1 file)
 ```
 
 **Large directory (truncated)**:
+
 ```
 Listed 150 items in /home/user/large-project:
 ──────────────────────────────────────────────────
@@ -139,39 +152,6 @@ DIR            -  tests/
 Total: 150 entries (30 directories, 120 files)
 ```
 
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-### Test
-
-After installation, test the tool in a DSH session:
-
-```
-# The model can call:
-list_directory(path: "/home/user")
-```
-
-## Comparison with Qwen Code
-
-This tool is inspired by Qwen Code's `list_directory` tool, with similar features:
-
-- ✅ Truncation at 100 entries
-- ✅ Sorted output (directories first)
-- ✅ Type and size information
-- ✅ Statistics display
-- ✅ System prompt guidance
-
-**Key difference**: DSH separates JSON output (for the model) from rendered text (for users), following DSH best practices.
-
-## License
-
-MIT
-
 ## Dependencies
 
 - `@deepseek-ai/cordis`: Plugin framework
@@ -179,3 +159,7 @@ MIT
 - `@deepseek-ai/dsh-fs`: Filesystem service
 - `@deepseek-ai/dsh-system-prompt`: System prompt utilities
 - `@deepseek-ai/schemastery`: Configuration schema validation
+
+## License
+
+MIT
