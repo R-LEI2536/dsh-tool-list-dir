@@ -2,7 +2,7 @@
 tutorial/
 
 # Build artifacts
-lib/
+# lib/  # Commented to include pre-built lib for GitHub installs
 *.tsbuildinfo
 
 # Dependencies
