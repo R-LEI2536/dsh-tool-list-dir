@@ -11,7 +11,7 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib/"],
+  "files": ["lib/", "cordis.patch.yml"],
   "scripts": {
     "build": "tsc"
   },
