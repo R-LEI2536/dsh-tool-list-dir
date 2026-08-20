@@ -1,4 +1,4 @@
 # dsh-tool-list-dir bundle: registers the list_directory tool
 - insert:
     - id: tool-list-dir
-      name: @rh854lkjd/dsh-tool-list-dir
+      name: '@rh854lkjd/dsh-tool-list-dir'
