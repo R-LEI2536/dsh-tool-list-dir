@@ -18,6 +18,12 @@ A lightweight, read-only directory listing tool for [dsh-user-approval](https://
 
 ## Installation
 
+### From NPM (Recommended)
+
+```bash
+dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
+```
+
 ### From GitHub
 
 ```bash
@@ -27,25 +33,13 @@ dsh plugin --profile web add github:R-LEI2536/dsh-tool-list-dir
 
 ## Configuration
 
-### Basic Usage (with all defaults)
-
-```yaml
-- id: tool-list-dir
-  name: dsh-tool-list-dir
-```
-
-This uses default values:
-- `order`: 100
-- `guidance`: Standard guidance text (see below)
-- `maxEntries`: 100
-
 ### Custom Configuration
 
-You can customize the tool behavior in your agent preset:
+You can customize the tool behavior in your agent preset or `cordis.patch.yml`:
 
 ```yaml
 - id: tool-list-dir
-  name: dsh-tool-list-dir
+  name: @rh854lkjd/dsh-tool-list-dir
   config:
     # Custom system prompt guidance order (default: 100)
     order: 150
@@ -64,6 +58,7 @@ You can customize the tool behavior in your agent preset:
 
 ```yaml
 - id: tool-list-dir
+  name: @rh854lkjd/dsh-tool-list-dir
   disabled: true
 ```
 

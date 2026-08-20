@@ -1,7 +1,14 @@
 {
-  "name": "dsh-tool-list-dir",
+  "name": "@rh854lkjd/dsh-tool-list-dir",
   "version": "0.2.0",
   "description": "List directory tool for DeepSeek Harness",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "tool",
+    "directory",
+    "plugin"
+  ],
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,6 +33,15 @@
     "@deepseek-ai/dsh-fs": "^0.1.0-rc.7",
     "typescript": "^5.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rh854lkjd/dsh-tool-list-dir.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rh854lkjd/dsh-tool-list-dir/issues"
+  },
+  "homepage": "https://github.com/rh854lkjd/dsh-tool-list-dir#readme",
+  "author": "R-LEI2536",
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"

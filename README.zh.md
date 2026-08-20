@@ -16,40 +16,19 @@
 
 ## 安装方式
 
-### 从 GitHub 安装
-
 ```bash
-dsh plugin --profile web add github:R-LEI2536/dsh-tool-list-dir
-```
-
-或添加到 `cordis.patch.yml`：
-
-```yaml
-- id: tool-list-dir
-  name: github:R-LEI2536/dsh-tool-list-dir
+dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
 ```
 
 ## 配置说明
 
-### 基础用法（使用所有默认值）
-
-```yaml
-- id: tool-list-dir
-  name: dsh-tool-list-dir
-```
-
-这将使用默认配置：
-- `order`: 100
-- `guidance`: 标准指导文本（见下文）
-- `maxEntries`: 100
-
 ### 自定义配置
 
-你可以在 agent preset 中自定义工具行为：
+你可以在 agent preset 或 `cordis.patch.yml` 中自定义工具行为：
 
 ```yaml
 - id: tool-list-dir
-  name: dsh-tool-list-dir
+  name: @rh854lkjd/dsh-tool-list-dir
   config:
     # 自定义系统提示指导顺序（默认：100）
     order: 150
@@ -68,6 +47,7 @@ dsh plugin --profile web add github:R-LEI2536/dsh-tool-list-dir
 
 ```yaml
 - id: tool-list-dir
+  name: @rh854lkjd/dsh-tool-list-dir
   disabled: true
 ```
 
