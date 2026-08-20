@@ -1,6 +1,6 @@
 {
   "name": "@rh854lkjd/dsh-tool-list-dir",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "List directory tool for DeepSeek Harness",
   "keywords": [
     "dsh",
@@ -18,7 +18,10 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib/", "cordis.patch.yml"],
+  "files": [
+    "lib/",
+    "cordis.patch.yml"
+  ],
   "scripts": {
     "build": "tsc"
   },
