@@ -1,6 +1,6 @@
 {
   "name": "@rh854lkjd/dsh-tool-list-dir",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "List directory tool for DeepSeek Harness",
   "keywords": [
     "dsh",
