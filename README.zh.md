@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**版本 0.2.0**
+**版本 0.2.4**
 
 [English](./README.md)
 
@@ -30,8 +30,8 @@ dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
 - id: tool-list-dir
   name: @rh854lkjd/dsh-tool-list-dir
   config:
-    # 自定义系统提示指导顺序（默认：100）
-    order: 150
+    # 自定义系统提示指导顺序（默认：1350）
+    order: 1350
     
     # 自定义指导文本
     guidance: |
@@ -55,7 +55,7 @@ dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
 
 | 选项 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `order` | number | `100` | 系统提示指导部分的顺序。数值越大，在提示词中出现得越靠后。 |
+| `order` | number | `1350` | 系统提示指导部分的顺序。默认 `1350` 落在 DSH 0.1.2 工具描述带（1000-2900）内的 `TOOL_EDIT`（1300）与 `TOOL_GLOB`（1400）之间。数值越大，在提示词中出现得越靠后。 |
 | `guidance` | string | *(见默认值)* | 显示给模型的自定义指导文本。可用于提供特定上下文的指令。 |
 | `maxEntries` | number | `100` | 返回的最大条目数。范围：1-1000。更大的目录会被截断。 |
 

@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**Version 0.2.0**
+**Version 0.2.4**
 
 [中文](./README.zh.md)
 
@@ -41,8 +41,8 @@ You can customize the tool behavior in your agent preset or `cordis.patch.yml`:
 - id: tool-list-dir
   name: @rh854lkjd/dsh-tool-list-dir
   config:
-    # Custom system prompt guidance order (default: 100)
-    order: 150
+    # Custom system prompt guidance order (default: 1350)
+    order: 1350
     
     # Custom guidance text for the model
     guidance: |
@@ -66,7 +66,7 @@ You can customize the tool behavior in your agent preset or `cordis.patch.yml`:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `order` | number | `100` | Order of the system prompt guidance section. Higher values appear later in the prompt. |
+| `order` | number | `1350` | Order of the system prompt guidance section. Default `1350` sits inside DSH 0.1.2's tool description band (1000-2900), between `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400). Higher values appear later in the prompt. |
 | `guidance` | string | *(see default)* | Custom guidance text shown to the model. Use this to provide context-specific instructions. |
 | `maxEntries` | number | `100` | Maximum number of entries to return. Range: 1-1000. Larger directories are truncated. |
 

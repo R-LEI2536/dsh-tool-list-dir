@@ -8,7 +8,11 @@ export declare const name = "tool-list-dir";
 export declare const inject: string[];
 /** Plugin configuration schema. */
 export interface Config {
-    /** Order of the system prompt guidance section (default: 100). */
+    /** Order of the system prompt guidance section (default: 1350).
+     *  1350 sits inside DSH 0.1.2's tool description band (1000-2900), between
+     *  `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400), so this tool's guidance renders
+     *  alongside other filesystem tools without colliding with DSH-official
+     *  `SECTION_ORDERS` slots. */
     order?: number;
     /** Custom guidance text for the system prompt (default: standard guidance). */
     guidance?: string;
