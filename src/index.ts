@@ -22,7 +22,7 @@ const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands lik
 /** Plugin configuration schema. */
 export interface Config {
   /** Order of the system prompt guidance section (default: 1350).
-   *  1350 sits inside DSH 0.1.2's tool description band (1000-2900), between
+   *  1350 sits inside DSH 0.1.5's tool description band (1000-2900), between
    *  `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400), so this tool's guidance renders
    *  alongside other filesystem tools without colliding with DSH-official
    *  `SECTION_ORDERS` slots. */

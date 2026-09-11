@@ -1,6 +1,10 @@
 # Development
 tutorial/
 
+# Local tooling state
+.reme/
+logs/
+
 # Build artifacts
 # lib/  # Commented to include pre-built lib for GitHub installs
 *.tsbuildinfo

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-09-11
+
+### Changed
+- Bumped all `@deepseek-ai/*` peer and dev dependencies from `*` to `^0.1.5-rc.1` so the plugin actually resolves against DSH 0.1.5 (the prior `*` could not resolve to a prerelease tag like `0.1.5-rc.1` under default node-semver semantics).
+- Updated wording that referenced "DSH 0.1.2's tool description band" to 0.1.5 in `src/index.ts`, `README.md`, and `README.zh.md`. The 1000-2900 tool band and the default `order: 1350` slot are unchanged in 0.1.5.
+
 ## [0.2.4] - 2026-09-04
 
 ### Fixed
@@ -34,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.2.5]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.0...v0.2.4
 [0.2.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/releases/tag/v0.1.0
