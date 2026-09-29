@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**Version 0.2.5**
+**Version 0.2.6**
 
 [中文](./README.zh.md)
 

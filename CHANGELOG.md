@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-09-29
+
+### Changed
+- Bumped peer/dev dependencies to support DSH `0.1.7-rc.1+`: `@deepseek-ai/dsh-tools`, `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` from `^0.1.5-rc.1` to `^0.1.7-rc.1` (admits `0.1.7-rc.2` and future stable; `^0.1.7`/`~0.1.7`/`>=0.1.7` would reject prereleases under semver 7.8.5 + `includePrerelease`).
+- Corrected `@deepseek-ai/cordis` to `~4.0.4` and `@deepseek-ai/schemastery` to `~3.18.4` — the previous `^0.1.5-rc.1` was never satisfiable (those packages publish only `4.0.x` / `3.18.x`; the DSH 0.1.7-rc.2 host and all first-party packages use `~4.0.4` / `~3.18.4`).
+- `src/` is unchanged: typecheck against the `0.1.7-rc.2` type surface passes and `lib/` output is byte-identical, confirming all consumed APIs (`ctx.systemPrompt.section`, `ctx.tools.register`/`defineTool`, `ctx.fs.resolve`/`listDir`, `exec.agent?.session.header.cwd`) are compatible with DSH 0.1.7-rc.2.
+
 ## [0.2.5] - 2026-09-11
 
 ### Changed
@@ -40,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.2.6]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.0...v0.2.4
 [0.2.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.1.0...v0.2.0
