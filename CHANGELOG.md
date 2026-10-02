@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-10-02
+
+### Changed
+- Bumped the three `@deepseek-ai/dsh-*` peer+dev ranges from `^0.1.7-rc.1` to `^0.2.0-rc.1` so the plugin passes the DSH 0.2.0-rc.2 plugin compatibility gate (`packages/boot/app-boot/src/plugin-compatibility.ts`: it evaluates `peerDependencies` only, with `includePrerelease`, so `^0.1.7-rc.1` = `>=0.1.7-rc.1 <0.2.0-0` is rejected by a `0.2.0-rc.2` runtime and the row would be disabled). The new range admits `0.2.0-rc.1`/`rc.2`/`rc.3` and `0.2.x` stable, and still rejects `0.3.0`.
+- `@deepseek-ai/cordis` (`~4.0.4`) and `@deepseek-ai/schemastery` (`~3.18.4`) are unchanged: the gate skips non-`dsh-*` names, and both are byte-identical between 0.1.7-rc.2 and 0.2.0-rc.2.
+- `src/` is unchanged; typecheck against the `0.2.0-rc.2` type surface passes and `lib/` output stays byte-identical. All consumed APIs (`ctx.systemPrompt.section`, `ctx.tools.register`/`defineTool`, `ctx.fs.resolve`/`listDir`, `exec.agent?.session.header.cwd`) are unchanged in 0.2.0-rc.2, and `SECTION_ORDERS` still places `TOOL_EDIT` / `TOOL_GLOB` at 1300 / 1400, so the default `order: 1350` slot is unchanged.
+- Refreshed `pnpm-lock.yaml` from the `0.1.7-rc.2` to the `0.2.0-rc.2` cohort.
+
 ## [0.2.6] - 2026-09-29
 
 ### Changed
@@ -47,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.2.7]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.0...v0.2.4

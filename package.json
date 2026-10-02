@@ -1,6 +1,6 @@
 {
   "name": "@rh854lkjd/dsh-tool-list-dir",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "List directory tool for DeepSeek Harness",
   "keywords": [
     "dsh",
@@ -27,16 +27,16 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
-    "@deepseek-ai/dsh-tools": "^0.1.7-rc.1",
-    "@deepseek-ai/dsh-fs": "^0.1.7-rc.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.7-rc.1",
+    "@deepseek-ai/dsh-tools": "^0.2.0-rc.1",
+    "@deepseek-ai/dsh-fs": "^0.2.0-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "^0.2.0-rc.1",
     "@deepseek-ai/schemastery": "~3.18.4"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
-    "@deepseek-ai/dsh-tools": "^0.1.7-rc.1",
-    "@deepseek-ai/dsh-fs": "^0.1.7-rc.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.7-rc.1",
+    "@deepseek-ai/dsh-tools": "^0.2.0-rc.1",
+    "@deepseek-ai/dsh-fs": "^0.2.0-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "^0.2.0-rc.1",
     "@deepseek-ai/schemastery": "~3.18.4",
     "typescript": "^5.0.0"
   },
