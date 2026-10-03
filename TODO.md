@@ -32,5 +32,13 @@
       要在 DSH 里以工具级实现，得自己造：root→leaf 的 .gitignore 发现与嵌套模式重写、`.git/info/exclude`、`!` 否定语义、缓存与失效 —— 而 `listDir` 不提供任何钩子。
       0.3.0 的 `ignore` 参数已经覆盖 80% 场景（node_modules、*.log）且几乎零成本。真要做，应该做进 DSH 的 fs 服务，而不是这个插件。
 
+## 4. 发布待办（0.3.3）
+- [ ] `package.json` 版本号 `0.3.2` → `0.3.3`（代码已与 tag `v0.3.2` 不一致：`92dbc53` 统一了输出名词）
+- [ ] 修正 `README.md` 第 3 行的版本行（仍写着 `0.3.0`）
+- [ ] `CHANGELOG.md` 补 `[0.3.3]` 一节
+- [ ] 打 annotated tag `v0.3.3`
+- [ ] 修正 `CHANGELOG.md` 中引用的 `v0.1.0`、`v0.2.0`：这两个 tag 从不存在，对应的 compare 链接会 404
+
 ## 备注
+- 开发经验（验证方式、输出文案约定、DSH 插件硬事实、发布规范）见 [LESSONS.md](./LESSONS.md)
 - 原计划新增的 read 工具（按行范围读取）取消：DSH 官方 read 已支持该功能。
