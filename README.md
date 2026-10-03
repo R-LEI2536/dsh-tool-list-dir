@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**Version 0.2.7**
+**Version 0.3.0**
 
 [中文](./README.zh.md)
 
@@ -10,7 +10,8 @@ A lightweight, read-only directory listing tool for [dsh-user-approval](https://
 
 ## Features
 
-- **Smart Sorting**: Directories first, then files, alphabetically within each group
+- **Smart Sorting**: Directories first, then files, alphabetically within each group — sorted *before* truncation, so the shown subset is always the directories-first head
+- **Entry Filtering**: Optional `ignore` glob patterns omit matching entries, and the result reports how many were hidden
 - **Statistics**: Shows total count, files, and directories
 - **Truncation**: Limits output to 100 entries by default (configurable)
 - **Type & Size Info**: Displays entry type (DIR/FILE) and file sizes
@@ -76,6 +77,21 @@ You can customize the tool behavior in your agent preset or `cordis.patch.yml`:
 Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.
 ```
 
+## Tool Parameters
+
+These are per-call arguments, not plugin configuration.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | yes | Directory to list, resolved against the session working directory. Relative paths are allowed. |
+| `ignore` | string[] | no | Glob patterns matched against entry **basenames**. `*` and `?` are the only wildcards; every other character is literal. Matching entries are omitted. |
+
+```json
+{ "path": "src", "ignore": ["*.test.ts", "node_modules"] }
+```
+
+`ignore` mirrors qwen-code's `list_directory` semantics, so a pattern means the same thing in both harnesses.
+
 ## Tool Output
 
 ### JSON Structure (for the model)
@@ -117,6 +133,27 @@ Use the list_directory tool — not shell commands like ls — to browse directo
 }
 ```
 
+**When entries were filtered** (an `ignore` pattern matched):
+
+```json
+{
+  "path": "/home/user/project",
+  "entries": [
+    { "name": "src", "type": "directory" },
+    { "name": "package.json", "type": "file", "size": 1234 }
+  ],
+  "stats": {
+    "total": 2,
+    "files": 1,
+    "directories": 1,
+    "others": 0
+  },
+  "ignored": 3
+}
+```
+
+`ignored` is absent when nothing was filtered, and `stats` always describes the entries actually returned — `stats.total` equals the length of `entries` after filtering (before truncation).
+
 ### Rendered Output (user-visible)
 
 **Small directory**:
@@ -124,11 +161,24 @@ Use the list_directory tool — not shell commands like ls — to browse directo
 ```
 Listed 3 items in /home/user/project:
 ──────────────────────────────────────────────────
-DIR            -  src/
-DIR            -  tests/
-FILE    1234 B  package.json
+DIR               src/
+FILE      1234 B  package.json
+FILE      5678 B  README.md
 ──────────────────────────────────────────────────
-Total: 3 entries (2 directories, 1 file)
+Total: 3 entries (1 directories, 2 files)
+```
+
+**With `ignore`** (3 entries filtered out):
+
+```
+Listed 2 items in /home/user/project:
+──────────────────────────────────────────────────
+DIR               src/
+FILE      1234 B  package.json
+──────────────────────────────────────────────────
+[3 entries hidden by ignore patterns]
+
+Total: 2 entries (1 directories, 1 files)
 ```
 
 **Large directory (truncated)**:
@@ -136,14 +186,18 @@ Total: 3 entries (2 directories, 1 file)
 ```
 Listed 150 items in /home/user/large-project:
 ──────────────────────────────────────────────────
-DIR            -  src/
-DIR            -  tests/
+DIR               src/
+DIR               tests/
+FILE       100 B  file000.ts
+FILE       101 B  file001.ts
 ... (first 100 entries)
 ──────────────────────────────────────────────────
 [50 items truncated, showing first 100 of 150 total]
 
-Total: 150 entries (30 directories, 120 files)
+Total: 150 entries (2 directories, 148 files)
 ```
+
+Note that the shown entries are the **sorted head** of the listing, so directories always appear before the truncation cut.
 
 ## Dependencies
 

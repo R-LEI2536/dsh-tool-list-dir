@@ -16,6 +16,17 @@ export const inject = ['tools', 'fs', 'systemPrompt']
 const MAX_ENTRIES = 100
 const TYPE_ORDER: Record<string, number> = { directory: 0, file: 1, other: 2 }
 
+/** Compile glob-like basename patterns into anchored matchers; `*` and `?` are the only wildcards. */
+function compileIgnorePatterns(patterns: readonly string[]): RegExp[] {
+  return patterns.map((pattern) => {
+    const source = pattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\?/g, '.')
+    return new RegExp(`^${source}$`)
+  })
+}
+
 // Default guidance text
 const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.'
 
@@ -55,12 +66,17 @@ export function apply(ctx: Context, config: Config): void {
   
   ctx.tools.register(defineTool({
     name: 'list_directory',
-    description: 'List a directory: every entry with type and byte size. Read-only — use this instead of `ls` in the shell when browsing.',
+    description: 'List a directory: every entry with type and byte size. Read-only — use this instead of `ls` in the shell when browsing. Optional `ignore` glob patterns omit matching entries.',
     parameters: {
       path: { 
         type: 'string', 
         required: true, 
         description: 'Directory path to list, resolved against the session working directory.' 
+      },
+      ignore: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Glob patterns matched against entry names (basename only; `*` and `?` are the only wildcards). Matching entries are omitted from the listing.',
       },
     },
     output: {
@@ -102,17 +118,13 @@ export function apply(ctx: Context, config: Config): void {
               remaining: { type: 'number', required: true },
             },
           },
+          ignored: { type: 'number' },
         },
       },
       render: (_args, value) => {
-        // Sort entries: directories first, then files, then others; alphabetically within each group
-        const sorted = [...value.entries].sort((a, b) => {
-          const typeDiff = TYPE_ORDER[a.type] - TYPE_ORDER[b.type]
-          return typeDiff !== 0 ? typeDiff : a.name.localeCompare(b.name)
-        })
-        
-        // Format entries with aligned columns
-        const lines = sorted.map(entry => {
+        // `entries` arrives already sorted — directories first, then files, then
+        // others, alphabetically within each group (see `execute`).
+        const lines = value.entries.map(entry => {
           const typeLabel = entry.type === 'directory' ? 'DIR ' : 
                            entry.type === 'file' ? 'FILE' : 'OTHR'
           const sizeInfo = entry.size !== undefined ? 
@@ -129,12 +141,17 @@ export function apply(ctx: Context, config: Config): void {
           '─'.repeat(50),
         ]
         
-        // Truncation notice
+        // Truncation and filtering notices
         if (value.truncated) {
           parts.push(
-            `[${value.truncated.remaining} items truncated, showing first ${value.truncated.shown} of ${value.truncated.total} total]`,
-            ''
+            `[${value.truncated.remaining} items truncated, showing first ${value.truncated.shown} of ${value.truncated.total} total]`
           )
+        }
+        if (value.ignored) {
+          parts.push(`[${value.ignored} entries hidden by ignore patterns]`)
+        }
+        if (value.truncated || value.ignored) {
+          parts.push('')
         }
         
         // Statistics summary
@@ -155,43 +172,46 @@ export function apply(ctx: Context, config: Config): void {
         cwd === undefined ? { signal: exec.signal } : { cwd, signal: exec.signal },
       )
       const entries = await ctx.fs.listDir(target, exec.signal)
-      
-      // Calculate statistics based on full list
+
+      // Drop entries matching the caller's ignore patterns.
+      const matchers = compileIgnorePatterns(args.ignore ?? [])
+      const kept = matchers.length === 0
+        ? entries
+        : entries.filter(entry => !matchers.some(matcher => matcher.test(entry.name)))
+      const ignored = entries.length - kept.length
+
+      // Sort before truncating, so the shown subset is the directories-first head
+      // of the listing rather than an arbitrary slice of backend order.
+      const sorted = [...kept].sort((a, b) => {
+        const typeDiff = TYPE_ORDER[a.type] - TYPE_ORDER[b.type]
+        return typeDiff !== 0 ? typeDiff : a.name.localeCompare(b.name)
+      })
+
+      // Statistics describe the listed (post-filter) set, so `stats.total` matches
+      // the number of entries actually returned.
       const stats = {
-        total: entries.length,
-        files: entries.filter(e => e.type === 'file').length,
-        directories: entries.filter(e => e.type === 'directory').length,
-        others: entries.filter(e => e.type === 'other').length,
+        total: sorted.length,
+        files: sorted.filter(e => e.type === 'file').length,
+        directories: sorted.filter(e => e.type === 'directory').length,
+        others: sorted.filter(e => e.type === 'other').length,
       }
-      
+
       // Truncate if needed
-      if (entries.length > resolved.maxEntries) {
-        const shown = entries.slice(0, resolved.maxEntries)
-        return {
-          path: target.displayPath,
-          entries: shown.map(entry => ({
-            name: entry.name,
-            type: entry.type,
-            ...(entry.size !== undefined && { size: entry.size }),
-          })),
-          stats,
-          truncated: {
-            shown: resolved.maxEntries,
-            total: entries.length,
-            remaining: entries.length - resolved.maxEntries,
-          },
-        }
-      }
-      
-      // Return full list
+      const listed = sorted.slice(0, resolved.maxEntries)
+      const truncated = sorted.length > resolved.maxEntries
+        ? { shown: listed.length, total: sorted.length, remaining: sorted.length - listed.length }
+        : undefined
+
       return {
         path: target.displayPath,
-        entries: entries.map(entry => ({
+        entries: listed.map(entry => ({
           name: entry.name,
           type: entry.type,
           ...(entry.size !== undefined && { size: entry.size }),
         })),
         stats,
+        ...(truncated !== undefined && { truncated }),
+        ...(ignored > 0 && { ignored }),
       }
     },
     presentCall: (args) => ({

@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**版本 0.2.7**
+**版本 0.3.0**
 
 [English](./README.md)
 
@@ -8,7 +8,8 @@
 
 ## 功能特性
 
-- **智能排序**：目录优先，然后是文件，组内按字母排序
+- **智能排序**：目录优先，然后是文件，组内按字母排序 —— **先排序再截断**，所以截断后展示的始终是"目录优先"的那一段
+- **条目过滤**：可选的 `ignore` glob 模式会略过匹配的条目，并在结果中回报被隐藏的条数
 - **统计信息**：显示总数、文件数和目录数
 - **自动截断**：默认限制输出 100 条（可配置）
 - **类型和大小信息**：显示条目类型（DIR/FILE）和文件大小
@@ -65,6 +66,21 @@ dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
 Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.
 ```
 
+## 工具参数
+
+以下是**每次调用**的参数，不是插件配置项。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `path` | string | 是 | 要列出的目录，按会话工作目录解析，允许相对路径。 |
+| `ignore` | string[] | 否 | 匹配条目**文件名（basename）**的 glob 模式。`*` 和 `?` 是仅有的通配符，其余字符一律按字面量处理。匹配到的条目会被略过。 |
+
+```json
+{ "path": "src", "ignore": ["*.test.ts", "node_modules"] }
+```
+
+`ignore` 的语义与 qwen-code 的 `list_directory` 一致，同一个模式在两边含义相同。
+
 ## 工具输出
 
 ### JSON 结构（给模型的）
@@ -106,6 +122,27 @@ Use the list_directory tool — not shell commands like ls — to browse directo
 }
 ```
 
+**当条目被过滤时**（有 `ignore` 模式命中）：
+
+```json
+{
+  "path": "/home/user/project",
+  "entries": [
+    { "name": "src", "type": "directory" },
+    { "name": "package.json", "type": "file", "size": 1234 }
+  ],
+  "stats": {
+    "total": 2,
+    "files": 1,
+    "directories": 1,
+    "others": 0
+  },
+  "ignored": 3
+}
+```
+
+没有被过滤时 `ignored` 字段不出现。`stats` 始终描述**实际返回**的条目 —— `stats.total` 等于过滤后（截断前）`entries` 的长度。
+
 ### 渲染输出（用户可见）
 
 **小型目录**：
@@ -113,11 +150,24 @@ Use the list_directory tool — not shell commands like ls — to browse directo
 ```
 Listed 3 items in /home/user/project:
 ──────────────────────────────────────────────────
-DIR            -  src/
-DIR            -  tests/
-FILE    1234 B  package.json
+DIR               src/
+FILE      1234 B  package.json
+FILE      5678 B  README.md
 ──────────────────────────────────────────────────
-Total: 3 entries (2 directories, 1 file)
+Total: 3 entries (1 directories, 2 files)
+```
+
+**使用 `ignore`**（过滤掉 3 条）：
+
+```
+Listed 2 items in /home/user/project:
+──────────────────────────────────────────────────
+DIR               src/
+FILE      1234 B  package.json
+──────────────────────────────────────────────────
+[3 entries hidden by ignore patterns]
+
+Total: 2 entries (1 directories, 1 files)
 ```
 
 **大型目录（截断）**：
@@ -125,14 +175,18 @@ Total: 3 entries (2 directories, 1 file)
 ```
 Listed 150 items in /home/user/large-project:
 ──────────────────────────────────────────────────
-DIR            -  src/
-DIR            -  tests/
+DIR               src/
+DIR               tests/
+FILE       100 B  file000.ts
+FILE       101 B  file001.ts
 ... (前 100 条)
 ──────────────────────────────────────────────────
 [50 items truncated, showing first 100 of 150 total]
 
-Total: 150 entries (30 directories, 120 files)
+Total: 150 entries (2 directories, 148 files)
 ```
+
+注意展示的是排序后的**前一段**，所以目录一定会出现在截断点之前。
 
 ## 依赖
 

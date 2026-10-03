@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-03
+
+### Added
+- `ignore` parameter on `list_directory`: an array of glob patterns matched against **entry basenames** (`*` and `?` are the only wildcards, every other character is literal), mirroring qwen-code's `list_directory` semantics so a pattern means the same thing in both harnesses. Matching entries are omitted from the listing. Patterns are compiled once per call, not once per entry.
+- `ignored` field in the tool output (optional, present only when `> 0`): the number of entries hidden by `ignore`. Without it the model cannot tell "entry does not exist" from "entry was filtered out". The rendered output gains a matching `[N entries hidden by ignore patterns]` line.
+
+### Fixed
+- Sort now happens **before** truncation. Previously `execute` sliced `ctx.fs.listDir`'s raw order to `maxEntries` and only sorted inside `render`, so any directory with more than `maxEntries` entries showed an arbitrary slice with directories and files interleaved — defeating the advertised directories-first ordering. The comparator moved into `execute` (single source of truth) and `render` no longer re-sorts.
+- `stats` now counts the **listed** (post-filter) set, so `stats.total` always equals the number of entries actually returned.
+
 ## [0.2.7] - 2026-10-02
 
 ### Changed
@@ -55,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.3.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.7...v0.3.0
 [0.2.7]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.4...v0.2.5
