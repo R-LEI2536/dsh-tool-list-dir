@@ -27,9 +27,9 @@ function compileIgnorePatterns(patterns: readonly string[]): RegExp[] {
   })
 }
 
-/** Render a count with its noun in the correct number: `1 entry`, `2 entries`.
+/** Render a count with its noun in the correct number: `1 directory`, `2 directories`.
  *  Both forms are required — an English plural is not always the singular plus
- *  `s` (`entry` → `entries`), so a default would silently emit `entrys`. */
+ *  `s` (`directory` → `directories`), so a default would silently emit `directorys`. */
 function plural(count: number, singular: string, pluralForm: string): string {
   return `${count} ${count === 1 ? singular : pluralForm}`
 }
@@ -47,7 +47,7 @@ export interface Config {
   order?: number
   /** Custom guidance text for the system prompt (default: standard guidance). */
   guidance?: string
-  /** Maximum number of entries to return before truncation (default: 100). */
+  /** Maximum number of items to return before truncation (default: 100). */
   maxEntries?: number
 }
 
@@ -73,7 +73,7 @@ export function apply(ctx: Context, config: Config): void {
   
   ctx.tools.register(defineTool({
     name: 'list_directory',
-    description: 'List a directory: every entry with type and byte size. Read-only — use this instead of `ls` in the shell when browsing. Optional `ignore` glob patterns omit matching entries.',
+    description: 'List a directory: every item with type and byte size. Read-only — use this instead of `ls` in the shell when browsing. Optional `ignore` glob patterns omit matching items.',
     parameters: {
       path: { 
         type: 'string', 
@@ -83,7 +83,7 @@ export function apply(ctx: Context, config: Config): void {
       ignore: {
         type: 'array',
         items: { type: 'string' },
-        description: 'Glob patterns matched against entry names (basename only; `*` and `?` are the only wildcards). Matching entries are omitted from the listing.',
+        description: 'Glob patterns matched against item names (basename only; `*` and `?` are the only wildcards). Matching items are omitted from the listing.',
       },
     },
     output: {
@@ -145,7 +145,7 @@ export function apply(ctx: Context, config: Config): void {
         // filtered one must never read as "the directory is empty".
         if (value.stats.total === 0) {
           const text = value.ignored
-            ? `Directory ${value.path} is not empty. The ignore patterns hid ${plural(value.ignored, 'entry', 'entries')}.`
+            ? `Directory ${value.path} is not empty. The ignore patterns hid ${plural(value.ignored, 'item', 'items')}.`
             : `Directory ${value.path} is empty.`
           return [{ type: 'text', text }]
         }
@@ -165,7 +165,7 @@ export function apply(ctx: Context, config: Config): void {
           )
         }
         if (value.ignored) {
-          parts.push(`[${plural(value.ignored, 'entry', 'entries')} hidden by ignore patterns]`)
+          parts.push(`[${plural(value.ignored, 'item', 'items')} hidden by ignore patterns]`)
         }
         if (value.truncated || value.ignored) {
           parts.push('')
@@ -173,7 +173,7 @@ export function apply(ctx: Context, config: Config): void {
         
         // Statistics summary
         parts.push(
-          `Total: ${plural(value.stats.total, 'entry', 'entries')} ` +
+          `Total: ${plural(value.stats.total, 'item', 'items')} ` +
           `(${plural(value.stats.directories, 'directory', 'directories')}, ${plural(value.stats.files, 'file', 'files')})` +
           (value.stats.others ? `, ${plural(value.stats.others, 'other', 'others')}` : '')
         )

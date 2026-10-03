@@ -16,7 +16,7 @@ export interface Config {
     order?: number;
     /** Custom guidance text for the system prompt (default: standard guidance). */
     guidance?: string;
-    /** Maximum number of entries to return before truncation (default: 100). */
+    /** Maximum number of items to return before truncation (default: 100). */
     maxEntries?: number;
 }
 export declare const Config: z<Config>;
