@@ -8,27 +8,29 @@
 - [x] 保留 list_directory
 - [ ] 后续可继续加工具
 
-## 3. 与 qwen-code 的架构与性能对比（待做）
-对比对象：`ref_codes/qwen-code-main/packages/core/src/tools/ls.ts`（qwen 的 `list_directory`）。
-背景：0.3.0 已补齐两项功能差距（先排序再截断、`ignore` 参数 + `ignored` 计数），本次对比只看**架构**和**性能**。
+## 3. 与 qwen-code 的架构与性能对比 ✅
+对比对象：`ref_codes/qwen-code-main/packages/core/src/tools/ls.ts` 及其周边（tools.ts / tool-registry.ts / permission-manager.ts / fileDiscoveryService.ts）。
+背景：0.3.0 已补齐两项功能差距（先排序再截断、`ignore` 参数 + `ignored` 计数），本次只看**架构**和**性能**。
 
-- [ ] 架构差异
-  - [ ] 工具注册模型：DSH `defineTool` + 插件 `apply(ctx)`（声明式、schema 驱动、输出投影）
-        vs qwen `BaseDeclarativeTool` + `BaseToolInvocation` + `createInvocation`（命令式、面向对象）
-  - [ ] 权限模型：DSH 由 policy 层（dsh-user-approval）统一裁决
-        vs qwen 工具自带 `getDefaultPermission()`（工作区内 allow / 区外 ask）
-  - [ ] 过滤体系：我们无 vs qwen `FileDiscoveryService` + `filterFilesWithReport`（.gitignore / .qwenignore 全家桶）
-  - [ ] 错误词汇：DSH `FsError` 结构化 code（FS_NOT_FOUND / FS_NOT_DIRECTORY …）
-        vs qwen `ToolErrorType`（注意其 `if (!stats)` 分支是死代码，实际落 LS_EXECUTION_ERROR）
-  - [ ] 输出契约：DSH 强制 output schema + render 投影 vs qwen 只有 `llmContent` / `returnDisplay` 两个字符串
-- [ ] 性能差异
-  - [ ] 元数据获取：qwen 对每个条目串行 `await fs.stat`（N 次 syscall，无并发）
-        vs 我们 `ctx.fs.listDir` 一次性返回 name/type/size
-  - [ ] 排序与截断成本（我们已改为排序后截断，需评估大目录下的实际开销）
-  - [ ] 并发安全：我们 `isConcurrencySafe: true` vs qwen 无此概念
-  - [ ] 大目录 / 慢盘下的实测表现
-- [ ] 产出结论：是否值得补第三块能力（`.gitignore` / `.qwenignore` 支持）
-      注意 DSH 的 `listDir` 没有任何过滤入口，真要做得自己实现完整 gitignore 语义（`!` 否定、目录锚定、嵌套），成本不低。
+- [x] 架构差异
+  - [x] 工具注册模型：qwen 是 `BaseDeclarativeTool`（每个工具类持有 schema）+ `BaseToolInvocation`（每次调用一个实例），`build()` = 校验 → `createInvocation()`；
+        DSH 是 `defineTool()` 声明式定义 + cordis 插件 `apply(ctx)` 注册，参数与输出都编译成 JSON Schema
+  - [x] 权限模型：qwen 由工具自带 `getDefaultPermission()` 声明默认值，中央 PermissionManager 只在**有规则命中**时才覆盖；规则可持久化、支持 `Read` 元类别和路径前缀匹配。
+        DSH 的工具**无法声明权限**（`ToolCallKind` 只是 UI 图标语义），审批是独立的 `dsh-user-approval` 服务：一次性、必须在回合内、fail-closed、只有 ask/never、没有规则记忆
+  - [x] 过滤体系：qwen 有 `FileDiscoveryService`（进程内 `ignore` 库解析 .gitignore/.qwenignore，带缓存但**无失效机制**）；我们完全没有，只有 0.3.0 新增的调用级 `ignore`
+  - [x] 错误词汇：DSH `FsError` 结构化 code；qwen `ToolErrorType` 枚举（`ls.ts` 的 `FILE_NOT_FOUND` 分支是死代码）
+  - [x] 输出契约：**最大结构差异** —— DSH 在注册表里用 `output.schema` 校验 execute 返回值（不合法直接 `ToolOutputError`）；
+        qwen 只校验输入参数，返回值是 `llmContent` + `returnDisplay` 两个无类型字符串，不做任何校验
+- [x] 性能差异（实测：10000 条目、热缓存）
+  - [x] qwen 逐条目**串行** `await fs.stat`：78.7 ms；同样的事并行做 52.8 ms
+  - [x] 纯 `readdir` 2.0 ms；`readdir({withFileTypes:true})` 2.4 ms —— 但 Dirent **不带 size**
+  - [x] 结论：`size` 必须靠 stat 拿，所以"带大小的列表"这件事本身就要 ~45–53 ms/万条，两边都躲不掉；
+        qwen 真正的额外代价是**串行**，约 1.5×
+  - [x] 两边都在**截断前**对全部条目做 stat 和匹配（qwen 上限 100 行，却处理 1 万条）；DSH 的 `listDir` 是全有全无的，我们也无法只 stat 要展示的那 100 条
+- [x] 产出结论：**不补 gitignore**
+      qwen 的过滤是 harness 级服务（Config 持有的单例、跨工具共享、带缓存），不是工具级功能。
+      要在 DSH 里以工具级实现，得自己造：root→leaf 的 .gitignore 发现与嵌套模式重写、`.git/info/exclude`、`!` 否定语义、缓存与失效 —— 而 `listDir` 不提供任何钩子。
+      0.3.0 的 `ignore` 参数已经覆盖 80% 场景（node_modules、*.log）且几乎零成本。真要做，应该做进 DSH 的 fs 服务，而不是这个插件。
 
 ## 备注
 - 原计划新增的 read 工具（按行范围读取）取消：DSH 官方 read 已支持该功能。
