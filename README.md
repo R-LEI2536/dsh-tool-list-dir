@@ -199,6 +199,20 @@ Total: 150 entries (2 directories, 148 files)
 
 Note that the shown entries are the **sorted head** of the listing, so directories always appear before the truncation cut.
 
+**Empty directory** — an empty listing gets one sentence instead of a separator-framed block with no body:
+
+```
+Directory /home/user/empty is empty.
+```
+
+**Empty result, but not an empty directory** — when `ignore` hid every entry, the output says so instead of claiming the directory is empty:
+
+```
+Directory /home/user/project is not empty. All 5 entries were hidden by ignore patterns.
+```
+
+These two cases are deliberately distinct. Without the second wording the model would conclude the directory holds nothing, when in fact the caller's own `ignore` patterns removed everything.
+
 ## Dependencies
 
 - `@deepseek-ai/cordis`: Plugin framework

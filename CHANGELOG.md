@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-03
+
+### Fixed
+- An empty listing rendered as two adjacent separator rules with no body between them, plus a `Total: 0 entries (0 directories, 0 files)` line. It now renders one plain sentence: `Directory <path> is empty.`
+
+### Changed
+- An empty result caused by `ignore` no longer reads as an empty directory. When `ignore` hid every entry, the output is `Directory <path> is not empty. All <N> entries were hidden by ignore patterns.` instead of the empty-directory sentence. Reporting "empty" there would contradict the `ignored` field added in 0.3.0 and lead the model to conclude the directory holds nothing. `All <N>` is exact in this branch: `total === 0` with `ignored === N` implies the pre-filter listing held exactly N entries.
+- Non-empty listings are byte-identical to 0.3.0 (verified against the committed build).
+
 ## [0.3.0] - 2026-10-03
 
 ### Added
@@ -65,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.3.1]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.7...v0.3.0
 [0.2.7]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.5...v0.2.6

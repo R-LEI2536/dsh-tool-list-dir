@@ -188,6 +188,20 @@ Total: 150 entries (2 directories, 148 files)
 
 注意展示的是排序后的**前一段**，所以目录一定会出现在截断点之前。
 
+**空目录** —— 空结果只给一句话，不再渲染成两条分隔线夹着空内容：
+
+```
+Directory /home/user/empty is empty.
+```
+
+**结果为空，但目录并不空** —— 当 `ignore` 把每一条都挡住了，输出会说明这一点，而不是声称目录是空的：
+
+```
+Directory /home/user/project is not empty. All 5 entries were hidden by ignore patterns.
+```
+
+这两种情况是刻意分开的。少了第二种写法，模型会断定目录里什么都没有，而实际上是调用方自己的 `ignore` 模式把条目全部移除了。
+
 ## 依赖
 
 - `@deepseek-ai/cordis`: 插件框架
