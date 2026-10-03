@@ -154,7 +154,7 @@ DIR               src/
 FILE      1234 B  package.json
 FILE      5678 B  README.md
 ──────────────────────────────────────────────────
-Total: 3 entries (1 directories, 2 files)
+Total: 3 entries (1 directory, 2 files)
 ```
 
 **使用 `ignore`**（过滤掉 3 条）：
@@ -167,7 +167,7 @@ FILE      1234 B  package.json
 ──────────────────────────────────────────────────
 [3 entries hidden by ignore patterns]
 
-Total: 2 entries (1 directories, 1 files)
+Total: 2 entries (1 directory, 1 file)
 ```
 
 **大型目录（截断）**：
@@ -197,7 +197,7 @@ Directory /home/user/empty is empty.
 **结果为空，但目录并不空** —— 当 `ignore` 把每一条都挡住了，输出会说明这一点，而不是声称目录是空的：
 
 ```
-Directory /home/user/project is not empty. All 5 entries were hidden by ignore patterns.
+Directory /home/user/project is not empty. The ignore patterns hid 5 entries.
 ```
 
 这两种情况是刻意分开的。少了第二种写法，模型会断定目录里什么都没有，而实际上是调用方自己的 `ignore` 模式把条目全部移除了。

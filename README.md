@@ -165,7 +165,7 @@ DIR               src/
 FILE      1234 B  package.json
 FILE      5678 B  README.md
 ──────────────────────────────────────────────────
-Total: 3 entries (1 directories, 2 files)
+Total: 3 entries (1 directory, 2 files)
 ```
 
 **With `ignore`** (3 entries filtered out):
@@ -178,7 +178,7 @@ FILE      1234 B  package.json
 ──────────────────────────────────────────────────
 [3 entries hidden by ignore patterns]
 
-Total: 2 entries (1 directories, 1 files)
+Total: 2 entries (1 directory, 1 file)
 ```
 
 **Large directory (truncated)**:
@@ -208,7 +208,7 @@ Directory /home/user/empty is empty.
 **Empty result, but not an empty directory** — when `ignore` hid every entry, the output says so instead of claiming the directory is empty:
 
 ```
-Directory /home/user/project is not empty. All 5 entries were hidden by ignore patterns.
+Directory /home/user/project is not empty. The ignore patterns hid 5 entries.
 ```
 
 These two cases are deliberately distinct. Without the second wording the model would conclude the directory holds nothing, when in fact the caller's own `ignore` patterns removed everything.

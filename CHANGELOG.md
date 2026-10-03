@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-10-03
+
+### Fixed
+- Rendered counts used the plural noun for a count of one: `Total: 3 entries (1 directories, 2 files)`. Every counted noun now agrees with its number. The fix covers all seven sites, not only the `Total:` line: `Listed <N> items`, `[<N> items truncated]`, `[<N> entries hidden]`, and the `entries` / `directories` / `files` / `others` clauses.
+- The `plural(count, singular, plural)` helper requires both forms explicitly. A default of `singular + "s"` silently produced `entrys`, which the verification caught.
+
+### Changed
+- The filtered-empty sentence is now `Directory <path> is not empty. The ignore patterns hid <N> entries.` (was `All <N> entries were hidden by ignore patterns.`). The past-tense `hid` does not change form with the count, so one helper covers every number; the previous wording needed `was`/`were` agreement and produced the awkward `All 1 entry was hidden`.
+
 ## [0.3.1] - 2026-10-03
 
 ### Fixed
@@ -74,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.3.2]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.7...v0.3.0
 [0.2.7]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.2.6...v0.2.7

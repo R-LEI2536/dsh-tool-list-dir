@@ -27,6 +27,13 @@ function compileIgnorePatterns(patterns: readonly string[]): RegExp[] {
   })
 }
 
+/** Render a count with its noun in the correct number: `1 entry`, `2 entries`.
+ *  Both forms are required — an English plural is not always the singular plus
+ *  `s` (`entry` → `entries`), so a default would silently emit `entrys`. */
+function plural(count: number, singular: string, pluralForm: string): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`
+}
+
 // Default guidance text
 const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands like ls — to browse directory structures. When truncated use glob to find files by name pattern, or grep to search file contents. Use this for understanding project layouts.'
 
@@ -138,14 +145,14 @@ export function apply(ctx: Context, config: Config): void {
         // filtered one must never read as "the directory is empty".
         if (value.stats.total === 0) {
           const text = value.ignored
-            ? `Directory ${value.path} is not empty. All ${value.ignored} entries were hidden by ignore patterns.`
+            ? `Directory ${value.path} is not empty. The ignore patterns hid ${plural(value.ignored, 'entry', 'entries')}.`
             : `Directory ${value.path} is empty.`
           return [{ type: 'text', text }]
         }
 
         // Build output
         const parts: string[] = [
-          `Listed ${value.stats.total} items in ${value.path}:`,
+          `Listed ${plural(value.stats.total, 'item', 'items')} in ${value.path}:`,
           '─'.repeat(50),
           ...lines,
           '─'.repeat(50),
@@ -154,11 +161,11 @@ export function apply(ctx: Context, config: Config): void {
         // Truncation and filtering notices
         if (value.truncated) {
           parts.push(
-            `[${value.truncated.remaining} items truncated, showing first ${value.truncated.shown} of ${value.truncated.total} total]`
+            `[${plural(value.truncated.remaining, 'item', 'items')} truncated, showing first ${value.truncated.shown} of ${value.truncated.total} total]`
           )
         }
         if (value.ignored) {
-          parts.push(`[${value.ignored} entries hidden by ignore patterns]`)
+          parts.push(`[${plural(value.ignored, 'entry', 'entries')} hidden by ignore patterns]`)
         }
         if (value.truncated || value.ignored) {
           parts.push('')
@@ -166,9 +173,9 @@ export function apply(ctx: Context, config: Config): void {
         
         // Statistics summary
         parts.push(
-          `Total: ${value.stats.total} entries ` +
-          `(${value.stats.directories} directories, ${value.stats.files} files)` +
-          (value.stats.others ? `, ${value.stats.others} others` : '')
+          `Total: ${plural(value.stats.total, 'entry', 'entries')} ` +
+          `(${plural(value.stats.directories, 'directory', 'directories')}, ${plural(value.stats.files, 'file', 'files')})` +
+          (value.stats.others ? `, ${plural(value.stats.others, 'other', 'others')}` : '')
         )
         
         return [{ type: 'text', text: parts.join('\n') }]
