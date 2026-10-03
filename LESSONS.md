@@ -72,7 +72,6 @@ DSH 的 `fs` 后端编译在宿主里，不在 `node_modules`，读不到实现�
 
 ## 7. 遗留
 
-- `package.json` 仍是 `0.3.2`，但代码已与 tag `v0.3.2` 不一致（`92dbc53` 统一了名词）。发 0.3.3 需要：版本号、README 版本行、CHANGELOG 一节、打 tag。
-- `README.md` 第 3 行的 `**Version 0.3.0**` 早已过期。
-- `CHANGELOG.md` 引用了从不存在的 tag `v0.1.0`、`v0.2.0`，对应的 compare 链接会 404。
+- `CHANGELOG.md` 引用了从不存在的 tag `v0.1.0`、`v0.2.0`，对应的 compare 链接会 404。修法未定：要么回溯补 tag，要么改掉链接指向。
 - 未做：把 `.gitignore` / `.qwenignore` 解析做进本插件（决定见 [TODO.md](./TODO.md) 第 3 节）。
+- 未 push 到远端。
