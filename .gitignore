@@ -5,6 +5,7 @@ ref_codes/
 # Local tooling state
 .reme/
 logs/
+.pnpm-cache/
 
 # Build artifacts
 # lib/  # Commented to include pre-built lib for GitHub installs
@@ -12,6 +13,7 @@ logs/
 
 # Dependencies
 node_modules/
+package-lock.json
 
 # Editor
 .vscode/

@@ -7,10 +7,11 @@ import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type {} from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-system-prompt'
+import type {} from '@deepseek-ai/dsh-working-directory'
 import z from '@deepseek-ai/schemastery'
 
 export const name = 'tool-list-dir'
-export const inject = ['tools', 'fs', 'systemPrompt']
+export const inject = ['tools', 'fs', 'systemPrompt', 'workingDirectory']
 
 // Constants
 const MAX_ENTRIES = 100
@@ -40,7 +41,7 @@ const DEFAULT_GUIDANCE = 'Use the list_directory tool — not shell commands lik
 /** Plugin configuration schema. */
 export interface Config {
   /** Order of the system prompt guidance section (default: 1350).
-   *  1350 sits inside DSH 0.1.5's tool description band (1000-2900), between
+   *  1350 sits inside DSH 0.2.1's tool description band (1000-2900), between
    *  `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400), so this tool's guidance renders
    *  alongside other filesystem tools without colliding with DSH-official
    *  `SECTION_ORDERS` slots. */
@@ -183,7 +184,14 @@ export function apply(ctx: Context, config: Config): void {
     },
     isConcurrencySafe: () => true,
     async execute(args, exec) {
-      const cwd = exec.agent?.session.header.cwd
+      // Relative paths belong to the Session's CURRENT directory, which changes when
+      // `working_directory({ cd })` runs. As of DSH 0.2.1 `session.header.cwd` is only
+      // the original project identity / permission root, so it would go stale after a
+      // `cd`; the working-directory service commits the directory each call resolves
+      // against (the same source `@deepseek-ai/dsh-tool-fs` uses).
+      const cwd = exec.agent === undefined
+        ? undefined
+        : await ctx.workingDirectory.ensure(exec.agent, exec.signal)
       const target = await ctx.fs.resolve(
         args.path,
         cwd === undefined ? { signal: exec.signal } : { cwd, signal: exec.signal },
