@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**Version 0.3.3**
+**Version 0.4.0**
 
 [中文](./README.zh.md)
 
@@ -67,7 +67,7 @@ You can customize the tool behavior in your agent preset or `cordis.patch.yml`:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `order` | number | `1350` | Order of the system prompt guidance section. Default `1350` sits inside DSH 0.1.5's tool description band (1000-2900), between `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400). Higher values appear later in the prompt. |
+| `order` | number | `1350` | Order of the system prompt guidance section. Default `1350` sits inside DSH 0.2.1's tool description band (1000-2900), between `TOOL_EDIT` (1300) and `TOOL_GLOB` (1400). Higher values appear later in the prompt. |
 | `guidance` | string | *(see default)* | Custom guidance text shown to the model. Use this to provide context-specific instructions. |
 | `maxEntries` | number | `100` | Maximum number of items to return. Range: 1-1000. Larger directories are truncated. |
 
@@ -83,7 +83,7 @@ These are per-call arguments, not plugin configuration.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `path` | string | yes | Directory to list, resolved against the session working directory. Relative paths are allowed. |
+| `path` | string | yes | Directory to list, resolved against the session's **current** working directory (it follows `working_directory` `cd`). Relative paths are allowed. |
 | `ignore` | string[] | no | Glob patterns matched against item **basenames**. `*` and `?` are the only wildcards; every other character is literal. Matching items are omitted. |
 
 ```json
@@ -219,7 +219,18 @@ These two cases are deliberately distinct. Without the second wording the model 
 - `@deepseek-ai/dsh-tools`: Tool definition utilities
 - `@deepseek-ai/dsh-fs`: Filesystem service
 - `@deepseek-ai/dsh-system-prompt`: System prompt utilities
+- `@deepseek-ai/dsh-working-directory`: Session working directory (resolves a relative `path`)
 - `@deepseek-ai/schemastery`: Configuration schema validation
+
+Requires a DSH `0.2.1-rc.1` runtime or later `0.2.1` prerelease. On a `0.2.0-rc.2` host the plugin's peer range does not match and the plugin row is disabled by the compatibility gate.
+
+## Development
+
+```bash
+pnpm install
+pnpm test        # pretest builds lib/ first, then runs test/smoke.test.mjs
+pnpm run build   # tsc -> lib/ (lib/ is committed)
+```
 
 ## License
 

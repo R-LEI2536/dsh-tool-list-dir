@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**版本 0.3.3**
+**版本 0.4.0**
 
 [English](./README.md)
 
@@ -56,7 +56,7 @@ dsh plugin --profile web add @rh854lkjd/dsh-tool-list-dir
 
 | 选项 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `order` | number | `1350` | 系统提示指导部分的顺序。默认 `1350` 落在 DSH 0.1.5 工具描述带（1000-2900）内的 `TOOL_EDIT`（1300）与 `TOOL_GLOB`（1400）之间。数值越大，在提示词中出现得越靠后。 |
+| `order` | number | `1350` | 系统提示指导部分的顺序。默认 `1350` 落在 DSH 0.2.1 工具描述带（1000-2900）内的 `TOOL_EDIT`（1300）与 `TOOL_GLOB`（1400）之间。数值越大，在提示词中出现得越靠后。 |
 | `guidance` | string | *(见默认值)* | 显示给模型的自定义指导文本。可用于提供特定上下文的指令。 |
 | `maxEntries` | number | `100` | 返回的最大条目数。范围：1-1000。更大的目录会被截断。 |
 
@@ -72,7 +72,7 @@ Use the list_directory tool — not shell commands like ls — to browse directo
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `path` | string | 是 | 要列出的目录，按会话工作目录解析，允许相对路径。 |
+| `path` | string | 是 | 要列出的目录，按会话**当前**工作目录解析（`working_directory` 执行 `cd` 后会随之变化），允许相对路径。 |
 | `ignore` | string[] | 否 | 匹配条目**文件名（basename）**的 glob 模式。`*` 和 `?` 是仅有的通配符，其余字符一律按字面量处理。匹配到的条目会被略过。 |
 
 ```json
@@ -208,7 +208,18 @@ Directory /home/user/project is not empty. The ignore patterns hid 5 items.
 - `@deepseek-ai/dsh-tools`: 工具定义工具
 - `@deepseek-ai/dsh-fs`: 文件系统服务
 - `@deepseek-ai/dsh-system-prompt`: 系统提示工具
+- `@deepseek-ai/dsh-working-directory`: 会话工作目录（解析相对 `path`）
 - `@deepseek-ai/schemastery`: 配置 schema 验证
+
+要求 DSH `0.2.1-rc.1` 或更晚的 `0.2.1` 预发布运行时。在 `0.2.0-rc.2` 宿主上，插件的 peer 范围不匹配，兼容门会把该插件行禁用。
+
+## 开发
+
+```bash
+pnpm install
+pnpm test        # pretest 先构建 lib/，再跑 test/smoke.test.mjs
+pnpm run build   # tsc -> lib/（lib/ 提交进仓库）
+```
 
 ## 许可证
 

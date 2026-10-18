@@ -11,7 +11,7 @@
 
 后果是双向的误判：可能误以为"改动没生效"，也可能反过来误以为"生效了"。
 
-三条可用的验证路径：
+四条可用的验证路径（前两条跑在编译产物上）：
 
 1. **直接执行编译产物**（本次采用，不落任何文件）：
 
@@ -32,9 +32,11 @@
 
    这一层只覆盖 `execute` + `render`，`ctx.fs` 是假的，测不到真实的文件系统行为。
 
-2. **用 list 工具本身测**：真实链路——真 fs、真入参校验、真输出 schema 校验。但只反映会话启动时那一份代码。
+2. **仓库自带冒烟测试**（0.4.0 起）：`pnpm test`。`pretest` 先 `tsc`，再在 **`lib/` 产物**上用假 ctx 断言工具契约、相对路径解析、排序/截断、`ignore` 计数与空/被滤空两种文案。和路径 1 一样是假 `fs`，区别是它常驻仓库、可重复、失败即信号。
 
-3. **重启会话**，再用工具测。
+3. **用 list 工具本身测**：真实链路——真 fs、真入参校验、真输出 schema 校验。但只反映会话启动时那一份代码。
+
+4. **重启会话**，再用工具测。
 
 **验证要写断言，不要"看着对"。** 单复数那个 bug（`Total: 3 entrys`）是断言抓到的，肉眼读代码没看出来。
 
@@ -52,6 +54,8 @@
 - 工具返回值由注册表按 `output.schema` **运行时校验**，不合规直接抛 `ToolOutputError`；入参在 `defineTool` 包装过的 `execute` 之前校验，抛 `ToolArgsError`。这是 qwen-code 没有的一层（qwen 只校验入参，返回值是无类型的 `llmContent`）。
 - `ToolCallKind`（`'read'` / `'edit'`）只是 UI 呈现语义，**不是权限**。DSH 工具无法自己声明权限。
 - 审批是独立的 `dsh-user-approval` 服务：一次性、必须在回合内、fail-closed、只有 ask/never、无规则记忆、无路径匹配。
+- **相对路径必须走 `ctx.workingDirectory.ensure(exec.agent, exec.signal)`。** DSH 0.2.1 起 `Session.header.cwd` 只是会话**原始**项目身份/权限根，`working_directory` 执行 `cd` 后它不变；官方 `@deepseek-ai/dsh-tool-fs` 就是这么解析的（`session-cwd.ts`）。非 agent 调用（`exec.agent === undefined`）不传 `cwd`，由 fs 后端决定。代价：插件 `inject` 多一个 `workingDirectory`，profile 里没有这个服务就会一直 PENDING。
+- **peer 范围就是启动门。** `^0.2.1-rc.1` 这类范围同时接受 `rc.1`/`rc.2`，但**不含**更低宿主；写精确版本（`0.2.1-rc.1`）会在下一个 rc 立刻被拒，`^0.2.1`（不带 prerelease）当下就被拒。
 
 ## 4. 工具使用与协作
 
@@ -65,6 +69,8 @@
 - `lib/` **提交进仓库**（git 跟踪）。所以改完 `src/` 必须重新 `tsc`，并把产物和源码一起提交。
 - 本沙箱里 npm 不可用（`npm whoami` 报 `EROFS`），发布需要能写 npm 配置的环境和凭据。
 - 未 push 到远端。
+- 安装依赖用 `pnpm install --store-dir=.pnpm-cache/v11`（本仓库的 store 不在默认位置，否则 pnpm 会因为 store 不一致要求清空 `node_modules`）。
+- pnpm 11 的供应链 release-age 策略会把**刚发布**的预发布版挡在门外：`^0.2.1-rc.1` 在 0.4.0 时解析成 `0.2.1-rc.1` 而不是 `rc.2`（`pnpm view` 直接解析范围则给 `rc.2`）。这是保守结果，不要为了追 rc.2 去精确钉版本号。
 
 ## 6. 诚实边界
 

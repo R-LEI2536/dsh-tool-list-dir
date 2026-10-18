@@ -38,6 +38,14 @@
 - [x] `CHANGELOG.md` 补 `[0.3.3]` 一节
 - [x] 打 annotated tag `v0.3.3`，指向 `fb506ea`
 
+## 4b. 升级 0.4.0（DSH 0.2.1-rc.2）✅
+- [x] peer/dev 抬到 `^0.2.1-rc.1` 队列；新增 `@deepseek-ai/dsh-working-directory`；cordis `~4.0.5`、schemastery `~3.18.5`
+- [x] `src/index.ts`：相对路径改走 `ctx.workingDirectory.ensure()`（`session.header.cwd` 在 0.2.1 只是原始项目身份）
+- [x] 新增零依赖冒烟测试 `test/smoke.test.mjs` + `pnpm test`
+- [x] 删除陈旧的 npm `package-lock.json`（仓库用 pnpm）
+- [x] 文档同步：`CHANGELOG` / 两个 `README` / `LESSONS`
+- [ ] 发布 0.4.0 前置：宿主升到 0.2.1-rc.1/rc.2（`^0.2.1-rc.1` 在 0.2.0-rc.2 宿主上会被兼容门禁用）
+
 ## 5. 遗留
 - [ ] 修正 `CHANGELOG.md` 中引用的 `v0.1.0`、`v0.2.0`：这两个 tag 从不存在，对应的 compare 链接会 404。修法未定 —— 要么回溯补 tag，要么改掉链接指向。
 

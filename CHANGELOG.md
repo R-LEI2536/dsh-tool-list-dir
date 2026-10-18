@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-18
+
+### Changed
+- Moved the peer and dev ranges to the DSH `0.2.1` cohort: `@deepseek-ai/dsh-tools` / `@deepseek-ai/dsh-fs` / `@deepseek-ai/dsh-system-prompt` from `^0.2.0-rc.1` to `^0.2.1-rc.1`, `@deepseek-ai/cordis` from `~4.0.4` to `~4.0.5`, `@deepseek-ai/schemastery` from `~3.18.4` to `~3.18.5`. The single range `^0.2.1-rc.1` admits both the `0.2.1-rc.1` and `0.2.1-rc.2` runtimes; verified with the repository's own semver 7.8.5 under the gate's rule (`semver.satisfies(runtime, range, { includePrerelease: true })` over `@deepseek-ai/dsh*` peer entries only): `0.2.1-rc.1`/`rc.2` pass, `0.2.0-rc.2` is rejected.
+- Relative `path` now resolves against the Session's **current** working directory through `ctx.workingDirectory.ensure(exec.agent, exec.signal)` instead of `exec.agent?.session.header.cwd`. As of DSH 0.2.1 `Session.header.cwd` is only the original project identity / permission root, so the old source went stale after `working_directory({ cd })`; the new source is the one `@deepseek-ai/dsh-tool-fs` uses (`packages/fs/tool-fs/src/session-cwd.ts`). Non-agent calls still omit `cwd` and leave the directory to the filesystem backend.
+- `inject` now includes `workingDirectory`. The prompt-section comment no longer cites DSH 0.1.5; the tool band itself is unchanged (`TOOL_EDIT` 1300 / `TOOL_GLOB` 1400 in `SECTION_ORDERS`, band 1000–2900), so the default `order: 1350` still sits between them.
+- Dev dependencies resolved to the `0.2.1-rc.1` cohort rather than `rc.2`: pnpm's registry release-age policy holds back the newer prerelease. The shipped **range** admits `rc.2`, and `dsh-tools` / `dsh-fs` / `dsh-system-prompt` / `dsh-working-directory` carry no breaking type change between the two prereleases (their declarations consumed here were compared one by one).
+
+### Added
+- `@deepseek-ai/dsh-working-directory` as a peer and dev dependency. It is new in 0.2.1; `@deepseek-ai/dsh-base` mounts its row, so any profile built on the base bundle provides the service.
+- `test/smoke.test.mjs` plus `test` / `pretest` scripts: a zero-dependency `node:test` suite that runs against the built `lib/` and asserts the tool contract (name, parameters, prompt section, `presentCall`), working-directory resolution for agent and non-agent calls, sort-before-truncation, `ignore`/`ignored`, and the empty-versus-filtered wording.
+
+### Removed
+- The stale npm `package-lock.json` (version `0.2.3`, still pinned to the `0.1.0-rc.7` cohort). The repository is pnpm-managed; `package-lock.json` is now git-ignored so a stray `npm install` cannot land a second lockfile.
+
+### Compatibility
+- **The plugin is disabled on a 0.2.0-rc.2 host.** `^0.2.1-rc.1` does not satisfy that runtime, so app-boot rewrites the profile row to `disabled` (a bundle row would skip the whole package). Upgrade the host to `0.2.1-rc.1`/`rc.2` before installing 0.4.0 — host first, plugin second.
+- No other contract changed within the corpus covered by the 0.2.1-rc.2 upgrade guide: `defineTool`, `ctx.tools.register`, `ctx.fs.resolve`/`listDir`, `ctx.systemPrompt.section`, the `presentCall` shape, and `SECTION_ORDERS` are all unchanged. This plugin has no `./invariant` import, no `mode: both` / `backgroundMode` / `{{cwd}}` / `dshHome` / `webRuntime` configuration, and no web-client surface.
+
 ## [0.3.3] - 2026-10-03
 
 ### Changed
@@ -90,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.4.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.0...v0.3.1
