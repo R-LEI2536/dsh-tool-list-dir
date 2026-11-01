@@ -46,6 +46,18 @@
 - [x] 文档同步：`CHANGELOG` / 两个 `README` / `LESSONS`
 - [ ] 发布 0.4.0 前置：宿主升到 0.2.1-rc.1/rc.2（`^0.2.1-rc.1` 在 0.2.0-rc.2 宿主上会被兼容门禁用）
 
+## 4c. 升级 0.4.1（DSH 0.2.1-rc.5）✅
+依据：`../deepseek-harness/DSH-0.2.1-rc.5-插件升级指南.md`（rc.2 → rc.5 走廊）。
+- [x] §3 必修清单逐条核对：本插件是纯 host 工具插件，无 client/analytics/Tooltip/草稿/推理渲染面，命中 0 条
+- [x] peer 保持 `^0.2.1-rc.1`（覆盖 rc.1→rc.5；精确钉只匹配它写的那一版，rc.2 精确钉在 rc.5 上会被拒）
+- [x] devDeps 精确抬到 `0.2.1-rc.5`（4 个 dsh 包），`pnpm install --store-dir=.pnpm-cache/v11` 更新 lockfile
+- [x] 用 rc.5 声明重新 `tsc`：`lib/` 产物与 0.4.0 逐字节相同（消费的 .d.ts 未变），源码无需改动
+- [x] 兼容门实测：用宿主自带 `@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility(manifest, {}, '0.2.1-rc.5')` 判定 **compatible**；反例（peer 精确钉 `0.2.1-rc.2`、`^0.2.1`）按指南被拒
+- [x] `pnpm test` 9/9 通过（pretest 先 tsc）
+- [x] 版本与文档：`0.4.0` → `0.4.1`，CHANGELOG / 两个 README / LESSONS 同步
+- [ ] 发布 0.4.1 前置：宿主升到 `0.2.1-rc.5`（升级主机必须在 dsh 进程外做，本会话内不做）
+- [ ] push 分支 `chore/dsh-0.2.1-rc.5` 与 tag `v0.4.1`（本沙箱未 push）
+
 ## 5. 遗留
 - [ ] 修正 `CHANGELOG.md` 中引用的 `v0.1.0`、`v0.2.0`：这两个 tag 从不存在，对应的 compare 链接会 404。修法未定 —— 要么回溯补 tag，要么改掉链接指向。
 

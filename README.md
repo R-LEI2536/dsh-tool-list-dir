@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**Version 0.4.0**
+**Version 0.4.1**
 
 [中文](./README.zh.md)
 
@@ -222,7 +222,7 @@ These two cases are deliberately distinct. Without the second wording the model 
 - `@deepseek-ai/dsh-working-directory`: Session working directory (resolves a relative `path`)
 - `@deepseek-ai/schemastery`: Configuration schema validation
 
-Requires a DSH `0.2.1-rc.1` runtime or later `0.2.1` prerelease. On a `0.2.0-rc.2` host the plugin's peer range does not match and the plugin row is disabled by the compatibility gate.
+Requires a DSH `0.2.1-rc.1` runtime or later `0.2.1` prerelease; built, typechecked and tested against `0.2.1-rc.5`. On a `0.2.0-rc.2` host the plugin's peer range does not match and the plugin row is disabled by the compatibility gate.
 
 ## Development
 

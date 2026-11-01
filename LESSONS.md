@@ -70,7 +70,10 @@
 - 本沙箱里 npm 不可用（`npm whoami` 报 `EROFS`），发布需要能写 npm 配置的环境和凭据。
 - 未 push 到远端。
 - 安装依赖用 `pnpm install --store-dir=.pnpm-cache/v11`（本仓库的 store 不在默认位置，否则 pnpm 会因为 store 不一致要求清空 `node_modules`）。
-- pnpm 11 的供应链 release-age 策略会把**刚发布**的预发布版挡在门外：`^0.2.1-rc.1` 在 0.4.0 时解析成 `0.2.1-rc.1` 而不是 `rc.2`（`pnpm view` 直接解析范围则给 `rc.2`）。这是保守结果，不要为了追 rc.2 去精确钉版本号。
+- pnpm 11 的供应链 release-age 策略会把**刚发布**的预发布版挡在门外：0.4.0 时 `^0.2.1-rc.1` 解析成 `0.2.1-rc.1` 而不是 `rc.2`。所以**要对着目标 rc 做类型验证，就把 devDeps 精确钉到那个版本**（devDeps 不进兼容门）；0.4.1 钉 `0.2.1-rc.5` 后就真的装到了 rc.5。peer 仍保持宽范围 `^0.2.1-rc.1`。
+- **兼容门可以离线实算，不必真升级宿主。** 宿主安装目录里的 `@deepseek-ai/dsh-app-boot` 导出 `evaluatePluginCompatibility(manifest, exemptions?, runtimeVersion?)`：把插件 `package.json` 和目标 runtime 版本传进去，返回 `undefined` 即兼容，否则给出未满足的 `requirements`。0.4.1 就是这样在 rc.2 宿主上验证了 rc.5 兼容性。
+- **复算门禁要用宿主自带的 semver（7.8.5）。** npm 自带的 semver 7.8.1 对 `satisfies('0.2.1-rc.5', '^0.2.1', { includePrerelease: true })` 返回 `true`，7.8.5 返回 `false`；拿错版本会得出"`^0.2.1` 能过门"的错误结论。宿主自带的 semver 可以用 `createRequire(<dsh>/lib/bin.js)` 解析到。
+- **host 工具插件的 rc 升级通常只是依赖对齐。** 0.4.1 用 rc.5 声明重新 `tsc` 后 `lib/` 逐字节未变，说明消费的 `.d.ts` 没变。没有 diff 就不要硬编一个"升级"改动；把力气花在版本声明、lockfile 和验证证据上。
 
 ## 6. 诚实边界
 

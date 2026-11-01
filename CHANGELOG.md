@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-11-01
+
+### Changed
+- Dev dependencies now pin the DSH `0.2.1-rc.5` cohort: `@deepseek-ai/dsh-tools`, `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` and `@deepseek-ai/dsh-working-directory` moved from `^0.2.1-rc.1` to `0.2.1-rc.5`, and `pnpm-lock.yaml` was regenerated (`pnpm install --store-dir=.pnpm-cache/v11`). Previously `tsc` typechecked against the `0.2.1-rc.1` declarations, so a local build proved nothing about the newer runtime. Dev pins are not read by the compatibility gate — only `engines.dsh` and DSH peers are.
+- Peer ranges are deliberately **unchanged** at `^0.2.1-rc.1`. That single range admits every `0.2.1` prerelease from `rc.1` through `rc.5` and later; pinning a peer to `0.2.1-rc.5` (or any exact version) would fail the gate on the next rc.
+- `src/` is **unchanged**. The rc.2 → rc.5 corridor's breaking changes (`send_button_click.is_new_session`, the widened `TooltipSide` / `sidebar_menu_click.menu_name` unions, reasoning `rawText`, New Session blank-session reuse, the `ui-entry-customization` actions slots) are all web-client / analytics surfaces this host tool plugin never touches. Rebuilding `lib/` against the rc.5 declarations is byte-identical to the 0.4.0 build: the consumed tool APIs (`defineTool`, `ctx.tools.register`, `ctx.fs.resolve`/`listDir`, `ctx.systemPrompt.section`, `ctx.workingDirectory.ensure`, `presentCall`) did not change.
+
+### Compatibility
+- Runtime requirement is unchanged and still satisfied by `0.2.1-rc.5`. Verified against the gate implementation itself: `evaluatePluginCompatibility(manifest, {}, '0.2.1-rc.5')` from the runtime's `@deepseek-ai/dsh-app-boot` returns *compatible*, and the controls behave as the upgrade guide predicts — `^0.2.1-rc.1` and `>=0.2.0-rc.1 <0.3.0-0` pass, while a peer pinned to `0.2.1-rc.2` or ranged `^0.2.1` is rejected. An exact peer pin only ever satisfies the exact runtime it names (an `0.2.1-rc.5` pin would pass on rc.5 but fail every later rc), which is why the peers stay ranged.
+- `pnpm test` (whose `pretest` runs `tsc` first) passes 9/9 against the rc.5 declarations.
+- **Host first, plugin second.** A `0.2.1-rc.5` host satisfies `^0.2.1-rc.1`; a `0.2.0-rc.2` host still disables this row. Nothing in this release needs a host-side migration, and no session/SQLite data migration is involved (the corridor keeps `SESSION_FORMAT_VERSION` at 4).
+
 ## [0.4.0] - 2026-10-18
 
 ### Changed
@@ -109,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.4.1]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.1...v0.3.2
