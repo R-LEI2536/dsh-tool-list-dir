@@ -1,6 +1,6 @@
 # dsh-tool-list-dir
 
-**版本 0.4.1**
+**版本 0.4.2**
 
 [English](./README.md)
 
@@ -211,7 +211,7 @@ Directory /home/user/project is not empty. The ignore patterns hid 5 items.
 - `@deepseek-ai/dsh-working-directory`: 会话工作目录（解析相对 `path`）
 - `@deepseek-ai/schemastery`: 配置 schema 验证
 
-要求 DSH `0.2.1-rc.1` 或更晚的 `0.2.1` 预发布运行时；构建、类型检查与测试均已在 `0.2.1-rc.5` 上跑通。在 `0.2.0-rc.2` 宿主上，插件的 peer 范围不匹配，兼容门会把该插件行禁用。
+要求 DSH `0.2.1-rc.1` 或更晚的 `0.2.x` 预发布运行时；构建、类型检查与测试均已在 `0.2.2-rc.1` 上跑通。已用已安装的 `0.2.1-rc.5` 宿主自带的兼容门函数、以运行时 `0.2.2-rc.1` 实算：本插件兼容；在 `0.2.0-rc.2` 宿主上插件行会被禁用。DSH `0.2.2` 把 Node 下限抬到了 `>=24.9.0`，构建请用 Node 24.9 或更新版本（本次发布在 Node v24.18.0 上构建）。
 
 ## 开发
 

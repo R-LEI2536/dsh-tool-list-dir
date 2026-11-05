@@ -67,13 +67,16 @@
 - 提交信息用 Conventional Commits（`feat:` / `fix:` / `docs:` / `refactor:` / `chore:`），正文说清"为什么"而不只是"做了什么"。
 - tag 是 annotated，命名 `vX.Y.Z`，message 形如 `0.3.2 — count/number agreement`。
 - `lib/` **提交进仓库**（git 跟踪）。所以改完 `src/` 必须重新 `tsc`，并把产物和源码一起提交。
-- 本沙箱里 npm 不可用（`npm whoami` 报 `EROFS`），发布需要能写 npm 配置的环境和凭据。
-- 未 push 到远端。
+- **npm 默认缓存 `~/.npm` 在沙箱内只读**，直接 `npm whoami` / `npm publish` 会 EROFS；把 `npm_config_cache` 指到工作区内目录（如 `.pnpm-cache/npm`）就能正常发布（0.4.2 的发版命令按此执行）。查版本用 `pnpm view`。
+- **远端是 GitHub**（`git@github.com:R-LEI2536/dsh-tool-list-dir.git`）。22 端口可能被阻断，`git push` / `fetch` / `ls-remote` 报 `Connection reset` 时改用 `ssh://git@ssh.github.com:443/<owner>/<repo>.git` 的 URL 形式，配 `GIT_SSH_COMMAND` 的 `-F /dev/null -o IdentitiesOnly=yes -i <绝对私钥> -o ConnectTimeout=10`。
 - 安装依赖用 `pnpm install --store-dir=.pnpm-cache/v11`（本仓库的 store 不在默认位置，否则 pnpm 会因为 store 不一致要求清空 `node_modules`）。
-- pnpm 11 的供应链 release-age 策略会把**刚发布**的预发布版挡在门外：0.4.0 时 `^0.2.1-rc.1` 解析成 `0.2.1-rc.1` 而不是 `rc.2`。所以**要对着目标 rc 做类型验证，就把 devDeps 精确钉到那个版本**（devDeps 不进兼容门）；0.4.1 钉 `0.2.1-rc.5` 后就真的装到了 rc.5。peer 仍保持宽范围 `^0.2.1-rc.1`。
-- **兼容门可以离线实算，不必真升级宿主。** 宿主安装目录里的 `@deepseek-ai/dsh-app-boot` 导出 `evaluatePluginCompatibility(manifest, exemptions?, runtimeVersion?)`：把插件 `package.json` 和目标 runtime 版本传进去，返回 `undefined` 即兼容，否则给出未满足的 `requirements`。0.4.1 就是这样在 rc.2 宿主上验证了 rc.5 兼容性。
-- **复算门禁要用宿主自带的 semver（7.8.5）。** npm 自带的 semver 7.8.1 对 `satisfies('0.2.1-rc.5', '^0.2.1', { includePrerelease: true })` 返回 `true`，7.8.5 返回 `false`；拿错版本会得出"`^0.2.1` 能过门"的错误结论。宿主自带的 semver 可以用 `createRequire(<dsh>/lib/bin.js)` 解析到。
-- **host 工具插件的 rc 升级通常只是依赖对齐。** 0.4.1 用 rc.5 声明重新 `tsc` 后 `lib/` 逐字节未变，说明消费的 `.d.ts` 没变。没有 diff 就不要硬编一个"升级"改动；把力气花在版本声明、lockfile 和验证证据上。
+- pnpm 11 的供应链 release-age 策略会把**刚发布**的预发布版挡在门外：0.4.0 时 `^0.2.1-rc.1` 解析成 `0.2.1-rc.1` 而不是 `rc.2`。所以**要对着目标 rc 做类型验证，就把 devDeps 精确钉到那个版本**（devDeps 不进兼容门）；0.4.1 钉 `0.2.1-rc.5` 后就真的装到了 rc.5。peer 仍保持宽范围 `^0.2.1-rc.1`。**锁文件里"仍满足新范围"的旧版本不会自己升级**：0.4.2 把 cordis 从 `~4.0.5` 放宽成 `^4.0.5` 后重装，锁文件仍停在 `4.0.5`，必须精确钉 `4.1.0`（或 `pnpm update`）才会换到新基底。
+- **`~` 的上界很窄，`~3.18.5` 到不了 `3.19.0`。** DSH `0.2.2-rc.1` 全族把 `@deepseek-ai/cordis ~4.1.0` 声明成 peer；schemastery 则在 dsh-tools / dsh-system-prompt / dsh-working-directory 等包里是 dependency `~3.19.0`（不是 peer）。peer 要放宽到 `^4.0.5` / `^3.18.5`，dev 要精确钉 `4.1.0` / `3.19.0`。`pnpm peers check` 是发现这种错配最快的信号（install 末尾会提示 "Issues with peer dependencies"），别忽略它。
+- **兼容门表要按运行时版本读，不能按结论抄。** 指南 §1.1 把 `^0.2.1` / `~0.2.1` / `>=0.2.1` 在 `0.2.2-rc.1` 运行时下也标成 ❌；用真实函数实算，三门**全部通过**——`0.2.2-rc.1` 数值上高于 `0.2.1`，`includePrerelease: true` 只负责不再排除预发布。这三门在任何低于 `0.2.1` 的运行时上被拒（实测 `0.2.1-rc.5`、`0.2.0-rc.2` 都拒）。**门禁结论一律以 `evaluatePluginCompatibility` 的实跑为准**，指南表格只在它跑不了的时候作参考。
+- **DSH 0.2.2 起 `engines.node` 是 `>=24.9.0`**（0.2.1 是 `^22.19.0 || >=24.0.0`）。构建/CI 不能再指望 Node 22。
+- **宿主还没升级时也能验门禁**：用宿主自带 `@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility(manifest, {}, '<目标版本>')` 显式传目标 runtime。0.4.2 在 rc.5 宿主上验了 `0.2.2-rc.1`；rc.1 树里同一文件的谓词只有一行 `semver.satisfies(runtimeVersion, range, { includePrerelease: true })`，与 rc.5 逐字相同。
+- **复算门禁要用宿主自带的 semver（当前 7.8.6）。** npm 自带的 semver 7.8.1 对 `satisfies('0.2.1-rc.5', '^0.2.1', { includePrerelease: true })` 返回 `true`，宿主自带的 7.8.6 返回 `false`；拿错版本会得出"`^0.2.1` 能过门"的错误结论。宿主自带的 semver 可以用 `createRequire(<dsh>/lib/bin.js)` 解析到。
+- **host 工具插件的 rc 升级通常只是依赖对齐。** 0.4.1 和 0.4.2 用目标 rc 声明重新 `tsc` 后 `lib/` 都逐字节未变，说明消费的 API 签名没变（依赖自身的 `.d.ts` 有重构，如 dsh-tools 把 types 拆成多个子模块，但不影响本插件产物与类型面）。没有 diff 就不要硬编一个"升级"改动；把力气花在版本声明、lockfile 和验证证据上。
 
 ## 6. 诚实边界
 
@@ -83,4 +86,3 @@ DSH 的 `fs` 后端编译在宿主里，不在 `node_modules`，读不到实现�
 
 - `CHANGELOG.md` 引用了从不存在的 tag `v0.1.0`、`v0.2.0`，对应的 compare 链接会 404。修法未定：要么回溯补 tag，要么改掉链接指向。
 - 未做：把 `.gitignore` / `.qwenignore` 解析做进本插件（决定见 [TODO.md](./TODO.md) 第 3 节）。
-- 未 push 到远端。

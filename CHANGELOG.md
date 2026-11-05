@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-11-05
+
+### Changed
+- Dev dependencies now pin the DSH `0.2.2-rc.1` cohort: `@deepseek-ai/dsh-tools`, `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` and `@deepseek-ai/dsh-working-directory` moved from exact `0.2.1-rc.5` to exact `0.2.2-rc.1`, and `pnpm-lock.yaml` was regenerated (`pnpm install --store-dir=.pnpm-cache/v11`).
+- `@deepseek-ai/cordis` moved from `~4.0.5` to `^4.0.5` (peer) with an exact `4.1.0` dev pin, and `@deepseek-ai/schemastery` from `~3.18.5` to `^3.18.5` (peer) with an exact `3.19.0` dev pin. DSH `0.2.2-rc.1` ships cordis `4.1.0` / schemastery `3.19.0`; every dsh package this plugin depends on peers on cordis `~4.1.0`, and the packages that use schemastery carry it as a dependency `~3.19.0` (none declares it as a peer). The old tilde ranges cannot admit those versions at all (`~3.18.5` stops below `3.19.0`), and a plain reinstall of `^4.0.5` / `^3.18.5` keeps the already-locked `4.0.5` / `3.18.5` because both still satisfy the range — hence the exact dev pins. `pnpm peers check` is clean, so `lib/` is typechecked against the same cordis/schemastery declarations the target runtime ships. Neither name participates in the compatibility gate.
+- `src/` is **unchanged**, and the rebuilt `lib/` is byte-identical to 0.4.1 (`git diff -- lib` is empty). The rc.5 → 0.2.2-rc.1 corridor's breaking changes — the tool-executor split and the `dsh-tools` `mode` removal, `system-prompt/assemble` no longer carrying `tools`, `MenuTarget` → `ContextMenuTarget`, the `dsh-tool-subagent-control/list-agents` subpath removal, bundle lists moving to `@deepseek-ai/dsh-official-bundles`, the loader `EntryTree`/Include rework, the model-badge package removal, and the Schedule/projection rewrites — are all surfaces this single host tool plugin never touches. It only consumes `defineTool`, `ctx.tools.register`, `ctx.fs.resolve` / `listDir`, `ctx.systemPrompt.section` and `ctx.workingDirectory.ensure`, whose signatures did not change.
+
+### Compatibility
+- Peer ranges stay wide at `^0.2.1-rc.1`, which admits every `0.2.1` prerelease and, under the gate's `includePrerelease: true`, `0.2.2-rc.1` as well. Measured with the real function — `evaluatePluginCompatibility(manifest, {}, '0.2.2-rc.1')` from `@deepseek-ai/dsh-app-boot`, with the installed host's bundled `semver` 7.8.6 — this manifest is **compatible**. Controls: a peer pinned to exact `0.2.1-rc.5` is rejected, and a `0.2.0-rc.2` runtime is rejected. The function came from the still-installed `0.2.1-rc.5` host (`0.2.2-rc.1` is not installed on this machine); the rc.1 tree's `plugin-compatibility.ts` was read and its predicate is a one-line `semver.satisfies(runtimeVersion, range, { includePrerelease: true })` helper.
+- The upgrade guide's §1.1 table marks bare `^0.2.1` / `~0.2.1` / `>=0.2.1` as rejected at `0.2.2-rc.1`. The **executed** gate says otherwise: all three pass, because `0.2.2-rc.1` sorts above `0.2.1` numerically and `includePrerelease` lifts the prerelease exclusion. They are rejected on any runtime that sorts below `0.2.1` — measured rejected at both `0.2.1-rc.5` and `0.2.0-rc.2` — so the guide's ❌ holds there, not at `0.2.2-rc.1`. The wide range is still the right declaration because it survives a host rollback; the correction is that the guide's row is runtime-specific, not a general law.
+- `pnpm test` (whose `pretest` runs `tsc` first) passes 9/9 against the `0.2.2-rc.1` declarations.
+- **Host first, plugin second.** A `0.2.2-rc.1` host satisfies `^0.2.1-rc.1`; a `0.2.0-rc.2` host still has this row disabled by the gate. DSH `0.2.2` also raises `engines.node` to `>=24.9.0` (from `^22.19.0 || >=24.0.0`); this release was built and tested on Node v24.18.0. No session/SQLite migration is involved — Session format stays 4 and the SQLite schema stays 1.
+
 ## [0.4.1] - 2026-11-01
 
 ### Changed
@@ -121,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - README in English and Chinese
 
+[0.4.2]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/R-LEI2536/dsh-tool-list-dir/compare/v0.3.2...v0.3.3

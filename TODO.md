@@ -58,6 +58,18 @@
 - [ ] 发布 0.4.1 前置：宿主升到 `0.2.1-rc.5`（升级主机必须在 dsh 进程外做，本会话内不做）
 - [ ] push 分支 `chore/dsh-0.2.1-rc.5` 与 tag `v0.4.1`（本沙箱未 push）
 
+## 4d. 升级 0.4.2（DSH 0.2.2-rc.1）✅
+依据：`../deepseek-harness/DSH-0.2.2-rc.1-插件升级指南.md`（rc.5 → 0.2.2-rc.1 走廊；本插件条目在 §4.5）。
+- [x] §3 必修清单逐条核对：纯 host 工具插件，`grep` 词表（`list-agents` / `modelSelectionSettings` / `list_subagent_models` / `maxParallelSubCalls` / `CodeRunFailedError` / `jsonSchemaToTs` / `renderToolsSdk` / `defineContentToolFixture` / `MenuTarget` / `useMenuTarget` / `ctx.menus` / `assembly.tools` / `dsh-invariants` / `dsh-deepseek-model-label-1017` / bundle 清单名 / `EntryTree`）在 `src/` 与 `*.yml` 命中 0 条。不可能是命中面的理由：本插件没有 client/analytics/slot/菜单渲染面，不挂 `tools` 行（`cordis.patch.yml` 只 `insert` 自己一行），不 import 执行器/PTC/测试夹具，不读 `system-prompt/assemble` 的 `tools`，不子类化 `EntryTree`，也不导出 bundle 清单。
+- [x] devDeps 精确抬到 `0.2.2-rc.1`（`dsh-tools` / `dsh-fs` / `dsh-system-prompt` / `dsh-working-directory`），`pnpm install --store-dir=.pnpm-cache/v11` 重生成 lockfile
+- [x] 底座对齐：`@deepseek-ai/cordis` peer `~4.0.5` → `^4.0.5`、dev 钉 `4.1.0`；`@deepseek-ai/schemastery` peer `~3.18.5` → `^3.18.5`、dev 钉 `3.19.0`。0.2.2-rc.1 全族对 cordis 的 peer 是 `~4.1.0`；schemastery 在 dsh-tools / dsh-system-prompt / dsh-working-directory 等包里是 dependency `~3.19.0`（不是 peer），旧 `~3.18.5` 连它都够不到；放宽范围重装仍会留在 lockfile 里的旧版本，所以 dev 必须精确钉。`pnpm peers check` 已无告警
+- [x] 用 0.2.2-rc.1 声明重新 `tsc`：`lib/` 产物与 0.4.1 逐字节相同（消费的 API 签名未变；依赖自身的 `.d.ts` 有重构，如 dsh-tools 把 types 拆成多个子模块，但不影响本插件产物与类型面），源码无需改动
+- [x] 兼容门实测：`evaluatePluginCompatibility(manifest, {}, '0.2.2-rc.1')` 判定 **compatible**；对照组：peer 精确钉 `0.2.1-rc.5` 被拒、`0.2.0-rc.2` 运行时被拒
+- [x] 记录指南与实测的出入：指南 §1.1 把 `^0.2.1` / `~0.2.1` / `>=0.2.1` 在 `0.2.2-rc.1` 上标为 ❌，实算三门**均通过**（`0.2.2-rc.1` 数值高于 `0.2.1`，`includePrerelease` 只放宽预发布门槛）；这三门在 `0.2.1-rc.5` 与 `0.2.0-rc.2` 这些低于 `0.2.1` 的运行时上都被拒。详见 LESSONS
+- [x] `pnpm test` 9/9 通过（pretest 先 tsc）；构建环境 Node v24.18.0，满足 0.2.2 的 `>=24.9.0`
+- [x] 版本与文档：`0.4.1` → `0.4.2`，CHANGELOG / 两个 README / LESSONS 同步
+- 收尾动作（本提交后执行）：`npm publish` 0.4.2；push `main` 与 annotated tag `v0.4.2`
+
 ## 5. 遗留
 - [ ] 修正 `CHANGELOG.md` 中引用的 `v0.1.0`、`v0.2.0`：这两个 tag 从不存在，对应的 compare 链接会 404。修法未定 —— 要么回溯补 tag，要么改掉链接指向。
 
